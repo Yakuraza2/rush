@@ -1,0 +1,9 @@
+name: Rush-Object
+version: '${project.version}'
+main: fr.rush.romain.rush.Rush_Object
+api-version: '1.20'
+commands:
+  rush:
+    permission: rush.admin
+  team:
+    permission: rush.admin
