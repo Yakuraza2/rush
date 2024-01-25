@@ -28,18 +28,12 @@ public class RushListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         e.setJoinMessage("");
         Player p = e.getPlayer();
-        final boolean[] hasJoin = {false};
 
         if (p.hasPermission("rush.admin")) {
             p.sendMessage("Vous avez rejoint le serveur en tant que Staff, /rush join pour rejoindre une partie");
-        }
+        } else GameManager.Join(p, GameManager.selectRush());
 
-        Core.getRushsList().forEach((id, rush) -> {
-            if (rush.isState(GState.WAITING_FOR_PLAYERS) && !hasJoin[0]) {
-                GameManager.Join(p, rush);
-                hasJoin[0] = true;
-            }
-        });
+
     }
 
     @EventHandler

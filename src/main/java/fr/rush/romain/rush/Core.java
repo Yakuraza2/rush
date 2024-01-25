@@ -10,12 +10,16 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public final class Core extends JavaPlugin {
 
     private static final HashMap<String, Rush> rushs = new HashMap<>();
     public static HashMap<Player, Rush> playersRush = new HashMap<Player, Rush>();
+
+    public static List<Rush> waitingList = new ArrayList<>();
     private static File dataFolder;
 
     @Override
@@ -34,7 +38,7 @@ public final class Core extends JavaPlugin {
         getCommand("team").setExecutor(new CommandsTeam(this));
 
         //créer tous les objets <parties de rush> via une procedure pour pouvoir aussi les reload
-        createGames();
+        loadGames();
 
     }
 
@@ -73,30 +77,37 @@ public final class Core extends JavaPlugin {
     public static HashMap<String, Rush> getRushsList() { return rushs; }
 
     public static void addRushToList(String name, Rush game) { rushs.put(name, game); }
+    public static void addToWaiting(Rush rush){ waitingList.add(rush); }
+    public static void removeOfWaiting(Rush rush){ waitingList.remove(rush); }
 
-    public static void createGames(){
-        logger(1, "Création de toutes les parties de rush en config...");
+    public static List<Rush> getWaitingList() { return waitingList; }
+
+    public static void loadGames(){
+        logger(1, "Chargement des parties de rush...");
         File file = FileManager.get("rush-list");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
         for(String game : config.getStringList("list")){
-            createGame(game);
+            loadGame(game);
         }
     }
-
-    public static void createGame(String name){
-        logger(1, "Création du fichier " + name + "...");
-        File gameFile = FileManager.get(name);
-        YamlConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameFile);
-
-        rushs.put(name, new Rush(name));
+    public static void loadGame(String name){
+        logger(1, "Chargement de " + name + "...");
+        Rush rush = new Rush(name);
+        rushs.put(name, rush);
+        addRushToList(name, rush);
+        addToWaiting(rush); //By default, a game is at Waiting State.
     }
 
-    public static void load(){
-        for(String id : FileManager.getConfig("rushs-list").getStringList("rushs-list")){
-            logger(1, "Chargement du rush " + id);
-            addRushToList(id, new Rush(id));
-        }
+    public static void createGame(Player p, String rush_id) {
+
+        YamlConfiguration config = FileManager.getConfig(rush_id);
+
+        FileManager.set(config, rush_id + ".world", p.getWorld().getName());
+        FileManager.setLocation(config,rush_id + ".lobby", p.getLocation());
+        FileManager.setLocation(config,rush_id + ".spectator-spawn", p.getLocation());
+
+        FileManager.save(config, FileManager.get(rush_id));
     }
 
 }

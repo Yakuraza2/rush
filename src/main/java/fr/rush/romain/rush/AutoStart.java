@@ -49,6 +49,7 @@ public class AutoStart extends BukkitRunnable {
         if(timer<=0){
 
             Core.logger("Passage en PLAYING");
+            Core.removeOfWaiting(rush);
             rush.setState(GState.PLAYING);
 
             Core.logger("Lancement des spawners à items");
@@ -65,12 +66,14 @@ public class AutoStart extends BukkitRunnable {
                 player.sendMessage(FileManager.getConfigMessage("starting", rush));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
 
-                Core.logger(player.getName() + " a rejoint l'équipe jaune !");
+                Core.logger(player.getName() + " a rejoint l'équipe " + team.getDisplayName());
+
                 team.addPlayer(player);
                 rush.addAlivePlayer(player);
-                if(team.getPlayers().size() >= team.getSize()) i++;
 
                 rush.spawnPlayer(player);
+
+                if(team.getPlayers().size() >= team.getSize()) i++;
             }
             cancel();
         }

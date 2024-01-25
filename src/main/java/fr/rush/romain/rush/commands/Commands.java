@@ -7,8 +7,11 @@ import fr.rush.romain.rush.managers.GameManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Commands implements CommandExecutor {
@@ -16,7 +19,7 @@ public class Commands implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender player, Command command, String s, String[] args) {
+    public boolean onCommand(@NotNull CommandSender player, @NotNull Command command, @NotNull String s, String[] args) {
         Player p = (Player) player;
 
         if(args.length == 0) {
@@ -37,23 +40,50 @@ public class Commands implements CommandExecutor {
             return true;
         }
         if(args[0].equalsIgnoreCase("join")) {
-            AtomicBoolean hasJoin = new AtomicBoolean(false);
-            Core.getRushsList().forEach((id, rush) -> {
-                if (rush.isState(GState.WAITING_FOR_PLAYERS) && !hasJoin.get()) {
-                    GameManager.Join(p, rush);
-                    hasJoin.set(true);
-                }
-            });
+            GameManager.Join(p, GameManager.selectRush());
         }
         if(args[0].equalsIgnoreCase("reload")){
-            Core.load();
+            Core.loadGames();
         }
 
         if(args[0].equalsIgnoreCase("create")){
             if(args.length != 2 ) { player.sendMessage("§cUsage: /rush create <rush_id>"); }
-            FileManager.getConfig("rush-list").set("rush-list", FileManager.getConfig("rush-list").getStringList("rush-list").add(args[1]));
-            Core.createGame(args[1]);
+
+            YamlConfiguration config = FileManager.getConfig("rush-list");
+            if(FileManager.getConfig("rush-list").getStringList("rush-list").isEmpty()) {
+                config.set("rush-list", args[1]);
+            } else {
+                config.set("rush-list", FileManager.getConfig("rush-list").getStringList("rush-list").add(args[1]));
+            }
+            FileManager.save(config, FileManager.get("rush-list"));
+
             player.sendMessage("Création du fichier pour la partie " + args[1] + " il faudra redémarrer le serveur après configuration !");
+            Core.createGame(p, args[1]);
+
+            Core.loadGame(args[1]);
+        }
+
+        if(args[0].equalsIgnoreCase("set")){
+            if(args.length != 3 ) { player.sendMessage("§cUsage: /rush set <parameter> <rush_id>"); }
+
+            String parameter = args[1];
+            String rushid = args[2];
+
+            if(!Core.getRushsList().containsKey(rushid)){
+                p.sendMessage(rushid + " n'existe pas !");
+                return false;
+            }
+
+            YamlConfiguration config = FileManager.getConfig(rushid);
+
+            if(parameter.equalsIgnoreCase("lobby")){
+                FileManager.setLocation(config, rushid + ".lobby", p.getLocation());
+                FileManager.save(config, FileManager.get(rushid));
+                p.sendMessage("Lobby changed !");
+                return true;
+            }
+
+            p.sendMessage("Commande non reconnue");
         }
 
 

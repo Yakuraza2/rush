@@ -2,6 +2,7 @@ package fr.rush.romain.rush.managers;
 
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.objects.Rush;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -34,11 +35,20 @@ public class FileManager {
 
     public static File get(String fileName){return new File(Core.getPluginDataFolder(), fileName + ".yml");}
 
-    public static void set(String fileName, String path, int value){
+    public static void set(String fileName, String path, int value){ set(getConfig(fileName), path, value); }
+    public static void set(String fileName, String path, String value) { set(getConfig(fileName), path, value); }
 
-    }
-    public static void set(String fileName, String path, String value){
+    public static void setLocation(String fileName, String path, Location loc){ setLocation(getConfig(fileName), path, loc); }
 
+    public static void set(YamlConfiguration config, String path, int value){  config.set(path, value); }
+    public static void set(YamlConfiguration config, String path, String value) {  config.set(path, value); }
+
+    public static void setLocation(YamlConfiguration config, String path, Location loc){
+        config.set(path + ".x", loc.getBlockX());
+        config.set(path + ".y", loc.getBlockX());
+        config.set(path + ".z", loc.getBlockX());
+        config.set(path + ".yaw", (int) loc.getYaw());
+        config.set(path + ".pitch", (int) loc.getPitch());
     }
 
     public static YamlConfiguration getConfig(String fileName){
@@ -76,4 +86,12 @@ public class FileManager {
     public static String getConfigMessage(String path, Rush rush){ return getConfigMessage(path, null, true, rush, 0); }
     public static String getConfigMessage(String path, Rush rush, int timer){ return getConfigMessage(path, null, true, rush, timer); }
 
+    public static void save(YamlConfiguration config, File file){
+        try {
+            config.save(file);
+            System.out.println("Sauvegarde terminée !");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -33,6 +33,8 @@ public class CommandsTeam implements CommandExecutor {
             }
             FileManager.getConfig(args[1]).set("teams", FileManager.getConfig(args[1]).getStringList("teams").add(args[2]));
 
+
+            //refaire comme pour la creation de RUSH !
             FileManager.set(args[1], args[1] + ".teams." + args[2] + ".display-name", args[3]);
             FileManager.set(args[1], args[1] + ".teams." + args[2] + ".slots", 2);
             FileManager.set(args[1], args[1] + ".teams." + args[2] + ".color", "YELLOW");
