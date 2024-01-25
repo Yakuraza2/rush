@@ -1,0 +1,123 @@
+# <player> <killer> <time> <slots> <onlines> <bed> <purple-team> <yellow-team> <team> <item>
+messages:
+  prefix: "§6[§eRush§6]"
+  join-message: "§e<player> vient de rejoindre le §6Rush §e! <<onlines>/<slots>>"
+  countdown: "§eLe rush commence dans §6<time> §esecondes !"
+  killed-by-player: "§6<player> §ea été tué par §6<killer> !"
+  death: "§6<player> §ea cassé sa pipe !"
+  spectator-join: "§eLe jeu a déjà démarré !"
+  starting: "§eLe jeu démarre !"
+  bed-destroy: "§eLe lit §6<bed> §ea été détruit par §6<player> §e!"
+  ally-bed-destroy: "§eVous ne pouvez pas détruire votre lit !"
+  winning-broadcast: "§eBravo à l'équipe <team> §equi gagne le Rush !"
+  winning-solo-broadcast: "§eBravo à <player> de l'équipe <team> qui remporte seul ce RUSH !"
+  winners-message: "Vous avez gagné le RUSH !"
+  no-winner: "Il semble n'y avoir aucun gagnant, tout le monde est mort !"
+  slots-not-full: "Il n'y a pas assez de joueur pour commencer la partie !"
+  killer-message: "§eTu viens de tuer §6<player> §e!"
+  last-seconds: "Le serveur va redemarrer..."
+  no-pvp: "§cVous ne pouvez pas taper ce joueur maintenant !"
+  no-break: "§cVous ne pouvez pas casser de block maintenant !"
+  item-buy: "§eVous venez d'acheter : <item>"
+
+  yellow-team: "§eJAUNE"
+  purple-team: "§5VIOLETTE"
+
+  admin:
+    slots: "Nouveau nombre de slots défini à <slots> !"
+    lobby: ""
+    yellow: ""
+    purple: ""
+    spectators: ""
+    reload: ""
+    additemspawner: ""
+    shop-creation: "Vous venez de créer un shop !"
+
+  errors:
+    buy: "§cUne erreur est survenue lors du retrait de vos <item>s, veulliez contacter un Staff !"
+
+timers:
+  starting: 20
+  finishing: 30
+  player-zone-verif: 1
+  bronze: 2
+  iron: 10
+  gold: 25
+  diamond: 45
+
+gui:
+  display-names:
+    yellow: "§6[§eJaune§6] §b"
+    purple: "§1[§5Violet§1] §b"
+
+shops:
+    gui-name: "§dShop §eRush"
+    entity-name: "§dShop §eRush"
+    size: 9
+    display-names:
+      diamond: "§bDiamant"
+      gold: "§eOr"
+      iron: "§7Fer"
+      bronze: "§6Bronze"
+      price-prefix: "§e➡"
+    categories:
+      cat-0:
+        name: "§aTools"
+        item: "TNT"
+        size: 36
+        slot: 2
+        items:
+          item-0:
+            display-name: "§cTNT"
+            item-id: "TNT"
+            quantity: 1
+            item-slot: 3
+            price: 4
+            price-item: gold
+          item-1:
+            display-name: "§7Pioche en fer"
+            item-id: "IRON_PICKAXE"
+            quantity: 1
+            item-slot: 13
+            price: 4
+            price-item: gold
+          item-2:
+            display-name: "§cHache en diamant"
+            item-id: "DIAMOND_AXE"
+            quantity: 1
+            item-slot: 11
+            price: 4
+            price-item: gold
+      cat-1:
+        name: "§aCombat"
+        item: "NETHERITE_CHESTPLATE"
+        size: 36
+        slot: 4
+        items:
+          item-0:
+            display-name: "§cTNT"
+            item-id: "TNT"
+            quantity: 1
+            item-slot: 3
+            price: 4
+            price-item: gold
+          item-1:
+            display-name: "§7Epee en fer"
+            item-id: "IRON_SWORD"
+            quantity: 1
+            item-slot: 13
+            price: 4
+            price-item: iron
+          item-2:
+            display-name: "§cHache en diamant"
+            item-id: "DIAMOND_AXE"
+            quantity: 1
+            item-slot: 11
+            price: 6
+            price-item: diamond
+      cat-2:
+        name: "§aBuild"
+        item: "OAK_PLANKS"
+        size: 36
+        slot: 6
+        items:

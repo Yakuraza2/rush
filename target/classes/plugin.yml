@@ -1,0 +1,11 @@
+name: Rush
+version: '1.0-SNAPSHOT'
+main: fr.rush.romain.rush.Core
+api-version: '1.20'
+commands:
+  rush:
+    description: Parametrer les rushs
+    permission: rush.admin
+  team:
+    description: Parametrer les teams
+    permission: rush.admin
