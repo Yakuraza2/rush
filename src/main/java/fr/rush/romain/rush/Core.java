@@ -1,25 +1,29 @@
 package fr.rush.romain.rush;
 
+import fr.rush.romain.rush.commands.Commands;
+import fr.rush.romain.rush.commands.CommandsTeam;
+import fr.rush.romain.rush.managers.FileManager;
+import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 
-public final class Main extends JavaPlugin {
+public final class Core extends JavaPlugin {
 
     private static final HashMap<String, Rush> rushs = new HashMap<>();
+    public static HashMap<Player, Rush> playersRush = new HashMap<Player, Rush>();
     private static File dataFolder;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        dataFolder = getDataFolder();
 
         FileManager.create("rush-list");
-
-        dataFolder = getDataFolder();
 
         PluginManager pm = getServer().getPluginManager();
         logger(1, "Lancement du Listener: Rush");
@@ -89,11 +93,10 @@ public final class Main extends JavaPlugin {
     }
 
     public static void load(){
-        //pour tous les rushs en config : Main.addRushToList(args[2], new Rush());
+        for(String id : FileManager.getConfig("rushs-list").getStringList("rushs-list")){
+            logger(1, "Chargement du rush " + id);
+            addRushToList(id, new Rush(id));
+        }
     }
-
-/**
- * Pour les ID des parties de rush: créer une hashmap key = String et Object = Rush
- */
 
 }
