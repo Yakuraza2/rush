@@ -7,6 +7,7 @@ import fr.rush.romain.rush.objects.Team;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,27 +32,34 @@ public class CommandsTeam implements CommandExecutor {
                 player.sendMessage("Le Rush \"" + args[1] + "\" semble ne pas exister !");
                 return true;
             }
-            FileManager.getConfig(args[1]).set("teams", FileManager.getConfig(args[1]).getStringList("teams").add(args[2]));
 
+            String teamID = args[2];
+            String rushID = args[1];
+            YamlConfiguration config = FileManager.getConfig(rushID);
+
+            //Adding the team to the rush's team-list
+            config.set("teams", config.getStringList("teams").add(teamID));
 
             //refaire comme pour la creation de RUSH !
-            FileManager.set(args[1], args[1] + ".teams." + args[2] + ".display-name", args[3]);
-            FileManager.set(args[1], args[1] + ".teams." + args[2] + ".slots", 2);
-            FileManager.set(args[1], args[1] + ".teams." + args[2] + ".color", "YELLOW");
-            FileManager.set(args[1], args[1] + ".teams." + args[2] + ".spawn", String.valueOf(player.getLocation()));
-            FileManager.set(args[1], args[1] + ".teams." + args[2] + ".item-spawner", String.valueOf(player.getLocation()));
+            FileManager.set(config, rushID + ".teams." + teamID + ".display-name", args[3]);
+            FileManager.set(config, rushID + ".teams." + teamID + ".slots", 2);
+            FileManager.set(config, rushID + ".teams." + teamID + ".color", "YELLOW");
+            FileManager.setLocation(config, rushID + ".teams." + teamID + ".spawn", player.getLocation());
+            FileManager.setLocation(config, rushID + ".teams." + teamID + ".item-spawner", player.getLocation());
 
-            FileManager.set(args[1], args[1] + "teams." + args[2] + ".color.red", (int) (Math.random()*30));
-            FileManager.set(args[1], args[1] + "teams." + args[2] + ".color.green", (int) (Math.random()*30));
-            FileManager.set(args[1], args[1] + "teams." + args[2] + ".color.blue", (int) (Math.random()*30));
+            FileManager.set(config, rushID + "teams." + teamID + ".color.red", (int) (Math.random()*30));
+            FileManager.set(config, rushID + "teams." + teamID + ".color.green", (int) (Math.random()*30));
+            FileManager.set(config, rushID + "teams." + teamID + ".color.blue", (int) (Math.random()*30));
+
+            FileManager.save(config, FileManager.get(rushID));
 
             return true;
         }
 
         /**
-         * CHANGEMENT DES ATTRIBUTS D'UNE TEAM
-         * Sous la forme /team [rush_id] set [attribut] [valeur]
-         */
+         ** CHANGEMENT DES ATTRIBUTS D'UNE TEAM
+         ** Sous la forme /team [rush_id] set [attribut] [valeur]
+         **/
 
         if (args.length < 5) {
             player.sendMessage("Incorrect Usage: /team [rush_id] set [team] [setting] [value]");
@@ -82,26 +90,27 @@ public class CommandsTeam implements CommandExecutor {
 
         Team currentTeam = currentRush.getTeam(team_id);
 
+        YamlConfiguration config = FileManager.getConfig(rush_id);
+
         switch (attribut) {
             case "slots":
                 currentTeam.setSize(Integer.parseInt(value));
+                FileManager.set(config, rush_id  + "teams." + team_id + ".slots", value);
                 break;
             case "display-name":
                 currentTeam.setDisplayName(value);
+                FileManager.set(config, rush_id  + "teams." + team_id + ".slots", value);
                 break;
             case "spawn":
-                FileManager.set(rush_id, "teams." + team_id + ".spawn.x", player.getLocation().getBlockX());
-                FileManager.set(rush_id, "teams." + team_id + ".spawn.y", player.getLocation().getBlockY());
-                FileManager.set(rush_id, "teams." + team_id + ".spawn.z", player.getLocation().getBlockZ());
-                FileManager.set(rush_id, "teams." + team_id + ".spawn.yaw", (int) player.getLocation().getYaw());
-                FileManager.set(rush_id, "teams." + team_id + ".spawn.pitch", (int) player.getLocation().getPitch());
+                FileManager.setLocation(config, "teams." + team_id + ".spawn", player.getLocation());
                 break;
             default:
                 player.sendMessage("Given setting doesn't exists !");
                 return false;
-
             //Pour changer les parametres des teams: mettre la fin du path en args
         }
+
+        FileManager.save(config, FileManager.get(rush_id));
 
         return true;
     }

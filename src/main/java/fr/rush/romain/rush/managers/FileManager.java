@@ -27,6 +27,7 @@ public class FileManager {
                 file.createNewFile();
                 System.out.println("[FILES] Création du fichier " + fileName + ".yml");
             } catch (IOException e) {
+                Core.logger(4, "Error during creation of " + fileName);
                 throw new RuntimeException(e);
             }
         }else{
@@ -35,13 +36,10 @@ public class FileManager {
 
     public static File get(String fileName){return new File(Core.getPluginDataFolder(), fileName + ".yml");}
 
-    public static void set(String fileName, String path, int value){ set(getConfig(fileName), path, value); }
-    public static void set(String fileName, String path, String value) { set(getConfig(fileName), path, value); }
-
-    public static void setLocation(String fileName, String path, Location loc){ setLocation(getConfig(fileName), path, loc); }
-
-    public static void set(YamlConfiguration config, String path, int value){  config.set(path, value); }
-    public static void set(YamlConfiguration config, String path, String value) {  config.set(path, value); }
+    public static void set(YamlConfiguration config, String path, int value){  set(config, path, "" + value); }
+    public static void set(YamlConfiguration config, String path, String value) {
+        config.set(path, value);
+    }
 
     public static void setLocation(YamlConfiguration config, String path, Location loc){
         config.set(path + ".x", loc.getBlockX());
@@ -53,7 +51,9 @@ public class FileManager {
 
     public static YamlConfiguration getConfig(String fileName){
         File gameFile = FileManager.get(fileName);
-        return YamlConfiguration.loadConfiguration(gameFile);
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(gameFile);
+        config.options().copyDefaults();
+        return config;
     }
 
     public static YamlConfiguration getConfig(){
@@ -86,11 +86,13 @@ public class FileManager {
     public static String getConfigMessage(String path, Rush rush){ return getConfigMessage(path, null, true, rush, 0); }
     public static String getConfigMessage(String path, Rush rush, int timer){ return getConfigMessage(path, null, true, rush, timer); }
 
+
     public static void save(YamlConfiguration config, File file){
         try {
             config.save(file);
             System.out.println("Sauvegarde terminée !");
         } catch (IOException e) {
+            Core.logger(4, "Erreur durant la sauvegarde de " + file.getName() + " :");
             throw new RuntimeException(e);
         }
     }
