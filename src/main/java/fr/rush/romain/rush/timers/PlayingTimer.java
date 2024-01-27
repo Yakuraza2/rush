@@ -1,5 +1,7 @@
-package fr.rush.romain.rush;
+package fr.rush.romain.rush.timers;
 
+import fr.rush.romain.rush.GState;
+import fr.rush.romain.rush.managers.ItemsManager;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.Location;
@@ -71,7 +73,7 @@ public class PlayingTimer extends BukkitRunnable {
     private void spawnItem(Material material, String name){
         for(String teamID : FileManager.getConfig(rush.getID()).getStringList("teams")){
             Location Loc = rush.getTeam(teamID).getItemsSpawners();
-            Loc.getWorld().dropItem(Loc, Item.create(material, FileManager.getConfig().getString("shops.display-names." + name), 1));
+            Loc.getWorld().dropItem(Loc, ItemsManager.create(material, FileManager.getConfig().getString("shops.display-names." + name), 1));
         }
     }
 

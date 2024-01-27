@@ -1,5 +1,7 @@
-package fr.rush.romain.rush;
+package fr.rush.romain.rush.timers;
 
+import fr.rush.romain.rush.Core;
+import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Team;

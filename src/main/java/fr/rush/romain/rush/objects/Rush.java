@@ -1,6 +1,6 @@
 package fr.rush.romain.rush.objects;
 
-import fr.rush.romain.rush.AutoStart;
+import fr.rush.romain.rush.timers.AutoStart;
 import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;

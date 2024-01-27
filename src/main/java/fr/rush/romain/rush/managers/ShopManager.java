@@ -21,18 +21,29 @@ public class ShopManager {
     public static void createShop(String shopID){
         Core.logger(1, "création du shop " + shopID);
 
-        int size = FileManager.getConfig("shops").getInt(shopID + ".size");
-        String displayName = FileManager.getConfig("shops").getString(shopID + ".display-name");
+        try{
 
-        Inventory inventory = Bukkit.createInventory(null, size, displayName);
+            int size = FileManager.getConfig("shops").getInt(shopID + ".size");
+            String displayName = FileManager.getConfig("shops").getString(shopID + ".display-name");
 
-        for(String itemID : FileManager.getConfig("shops").getStringList("shops." + shopID + ".items")){
-            ShopItem item = new ShopItem(shopID, itemID);
+            Inventory inventory = Bukkit.createInventory(null, size, displayName);
 
-            inventory.setItem(item.getSlot(), item.getItemStack());
+            for(String itemID : FileManager.getConfig("shops").getStringList("shops." + shopID + ".items")){
+                ShopItem item = new ShopItem(shopID, itemID);
+
+                inventory.setItem(item.getSlot(), item.getItemStack());
+            }
+            Core.logger(1, shopID + " créé !");
+            shopList.put(shopID, inventory);
+
+        } catch(IllegalArgumentException e) {
+            e.fillInStackTrace();
+            Core.logger(4, "Erreur de chargement de " + shopID + " : le fichier shops.yml semble incomplet !");
+        } catch (Exception e){
+            e.fillInStackTrace();
+            Core.logger(4, "Erreur de chargement de " + shopID);
         }
 
-        shopList.put(shopID, inventory);
     }
 
     public static boolean exists(String id) { return shopList.containsKey(id); }

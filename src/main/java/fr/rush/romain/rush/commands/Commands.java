@@ -1,6 +1,5 @@
 package fr.rush.romain.rush.commands;
 
-import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
@@ -15,9 +14,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Commands implements CommandExecutor {
     public Commands(Core main) {
