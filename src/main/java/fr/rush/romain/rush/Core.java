@@ -3,7 +3,9 @@ package fr.rush.romain.rush;
 import fr.rush.romain.rush.commands.Commands;
 import fr.rush.romain.rush.commands.CommandsTeam;
 import fr.rush.romain.rush.managers.FileManager;
+import fr.rush.romain.rush.managers.ShopManager;
 import fr.rush.romain.rush.objects.Rush;
+import fr.rush.romain.rush.objects.ShopItem;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -28,6 +30,7 @@ public final class Core extends JavaPlugin {
         dataFolder = getDataFolder();
 
         FileManager.create("rush-list");
+        FileManager.create("shops");
 
         PluginManager pm = getServer().getPluginManager();
         logger(1, "Lancement du Listener: Rush");
@@ -39,6 +42,7 @@ public final class Core extends JavaPlugin {
 
         //créer tous les objets <parties de rush> via une procedure pour pouvoir aussi les reload
         loadGames();
+        ShopManager.loadShops();
 
     }
 
@@ -109,5 +113,4 @@ public final class Core extends JavaPlugin {
 
         FileManager.save(config, FileManager.get(rush_id));
     }
-
 }

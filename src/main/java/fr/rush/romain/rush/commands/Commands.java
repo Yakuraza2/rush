@@ -4,11 +4,16 @@ import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
+import fr.rush.romain.rush.managers.ShopManager;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -61,6 +66,36 @@ public class Commands implements CommandExecutor {
             Core.createGame(p, args[1]);
 
             Core.loadGame(args[1]);
+        }
+
+        if(args[0].equalsIgnoreCase("spawnshop")){
+            if(args.length < 2) {
+                p.sendMessage("Incorrect Usage ! /rush spawnshop <shop_id> <Villager's name>");
+                return false;
+            }
+            World world = p.getWorld();
+            Location loc = p.getLocation();
+            String shopID = args[1];
+
+            if(!ShopManager.exists(shopID)){
+                p.sendMessage(shopID + " n'existe pas !");
+                return true;
+            }
+
+            Villager categoriesEntity = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
+            categoriesEntity.setProfession(Villager.Profession.ARMORER);
+            categoriesEntity.setCustomNameVisible(true);
+            categoriesEntity.setAI(false);
+            categoriesEntity.setInvulnerable(true);
+            categoriesEntity.addScoreboardTag(shopID);
+            categoriesEntity.addScoreboardTag("shop");
+
+            StringBuilder str = new StringBuilder();
+            for(int i =2; i< args.length; i++){
+                str.append(args[i]).append(" ");
+            }
+
+            categoriesEntity.setCustomName(str.toString());
         }
 
         if(args[0].equalsIgnoreCase("set")){
