@@ -55,6 +55,6 @@ public class ShopItem {
     public int getSlot() { return aSlot; }
 
     public ShopItem getFromShop(String shopID, int slot){
-
+        return null;
     }
 }
