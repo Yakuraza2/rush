@@ -1,4 +1,5 @@
 fr\rush\romain\rush\commands\CommandsTeam.class
+fr\rush\romain\rush\objects\ShopItem.class
 fr\rush\romain\rush\objects\Team.class
 fr\rush\romain\rush\Core.class
 fr\rush\romain\rush\managers\CacheManager.class

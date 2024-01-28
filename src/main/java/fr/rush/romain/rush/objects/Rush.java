@@ -1,49 +1,65 @@
 package fr.rush.romain.rush.objects;
 
+import fr.rush.romain.rush.managers.InventoryManager;
 import fr.rush.romain.rush.timers.AutoStart;
 import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Rush {
     private final String aRush_id;
-    private List<Player> aPlayers;
-    private List<Player> aAlivePlayers;
+    private final List<Player> aPlayers = new ArrayList<>();
+    private final List<Player> aAlivePlayers = new ArrayList<>();
     private final Location aLobby;
     private final Location aSpectSpawn;
     private final HashMap<String, Team> aTeams;
     private final HashMap<Player, Team> playerTeam;
-    private final int aSlots;
+    private int aSlots;
     private GState aState;
+    private final int aTimer;
 
     private final AutoStart autoStart;
 
     public Rush(String rush_id){
-        AtomicInteger vSlots = new AtomicInteger();
+        aSlots = 0;
         aState = GState.WAITING_FOR_PLAYERS;
         aTeams = new HashMap<>();
         playerTeam = new HashMap<>();
 
-        for(String team : FileManager.getConfig(rush_id).getStringList("teams")){
+        for(String team : FileManager.getConfig(rush_id).getStringList("teams.list")){
             this.addTeam(rush_id, team);
+            aSlots += aTeams.get(team).getSize();
         }
-
-        this.aTeams.forEach((id, team) -> {
-            vSlots.addAndGet(team.getSize());
-        });
-        aSlots = vSlots.get();
-
         aRush_id = rush_id;
-        aLobby = FileManager.getConfig(rush_id).getLocation(rush_id + ".lobby");
-        aSpectSpawn = FileManager.getConfig(rush_id).getLocation(rush_id + ".spectator-spawn");
+
+        World world = Bukkit.getWorld(FileManager.getConfig(rush_id).getString(rush_id + ".world"));
+
+        int x = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.x");
+        int y = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.y");
+        int z = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.z");
+        int yaw = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.yaw");
+        int pitch = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.pitch");
+        aLobby = new Location(world, x, y ,z, yaw, pitch);
+
+        int x2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.x");
+        int y2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.y");
+        int z2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.z");
+        int yaw2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.yaw");
+        int pitch2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.pitch");
+        aSpectSpawn = new Location(world, x2, y2, z2, yaw2, pitch2);
+
+        aTimer = FileManager.getConfig(rush_id).getInt(rush_id + ".timer");
         autoStart = new AutoStart(this);
     }
 
@@ -63,7 +79,9 @@ public class Rush {
     }
 
     public void addTeam(String rush, String teamName){ this.aTeams.put(teamName, new Team(rush, teamName)); }
+    public HashMap<String, Team> getTeams(){ return this.aTeams; }
     public Team getPlayerTeam(Player p) { return this.playerTeam.get(p); }
+    public Team setPlayerTeam(Player p, Team team) { return this.playerTeam.put(p, team); }
 
     public Location getLobby() { return this.aLobby; }
 
@@ -100,7 +118,7 @@ public class Rush {
 
             getPlayerTeam(player).spawnPlayer(player);
 
-            GameManager.giveSpawnKit(player);
+            InventoryManager.giveSpawnKit(player);
         } else if(this.isState(GState.FINISH)){
             spawnSpectator(player);
         }else{
@@ -167,4 +185,6 @@ public class Rush {
         this.broadcast(FileManager.getConfigMessage("winning-broadcast", this).replaceAll("<team>", winners.getDisplayName()));
 
     }
+
+    public int getTimer() { return aTimer; }
 }

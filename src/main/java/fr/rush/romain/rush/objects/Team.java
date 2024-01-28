@@ -3,6 +3,7 @@ package fr.rush.romain.rush.objects;
 import fr.rush.romain.rush.managers.FileManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -23,14 +24,26 @@ public class Team {
     private final int[] aColor;
 
     public Team(String rush, String name){
-        String path = rush + ".teams." + name;
+        String path = "teams." + name;
 
         aPlayer = new ArrayList<>();
-        aSpawn = FileManager.getConfig(rush).getLocation(path + ".spawn");
-        aItemsSpawners = FileManager.getConfig(rush).getLocation(path + ".item-spawner");
         aSize= FileManager.getConfig(rush).getInt(path + ".slots");
         DisplayName =  FileManager.getConfig(rush).getString(path + ".display-name");
         team_id = name;
+
+        World world = Bukkit.getWorld(FileManager.getConfig(rush).getString(rush + ".world"));
+
+        int x = FileManager.getConfig(rush).getInt("teams." + name + ".spawn.x");
+        int y = FileManager.getConfig(rush).getInt("teams." + name + ".spawn.y");
+        int z = FileManager.getConfig(rush).getInt("teams." + name + ".spawn.z");
+        int yaw = FileManager.getConfig(rush).getInt("teams." + name + ".spawn.yaw");
+        int pitch = FileManager.getConfig(rush).getInt("teams." + name + ".spawn.pitch");
+        aSpawn = new Location(world, x, y ,z, yaw, pitch);
+
+        int x2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.x");
+        int y2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.spawn.y");
+        int z2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.spawn.z");
+        aItemsSpawners = new Location(world, x2, y2, z2, 1, 1);
 
         int r = FileManager.getConfig(rush).getInt(path + ".color.red");
         int g = FileManager.getConfig(rush).getInt(path + ".color.green");

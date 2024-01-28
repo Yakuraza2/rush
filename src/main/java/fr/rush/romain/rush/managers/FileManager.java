@@ -4,6 +4,7 @@ import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.file.YamlConfigurationOptions;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -31,7 +32,7 @@ public class FileManager {
                 throw new RuntimeException(e);
             }
         }else{
-            Core.logger("Le fichier 'rush' existe");}
+            Core.logger("Le fichier " + fileName + " existe");}
     }
 
     public static File get(String fileName){return new File(Core.getPluginDataFolder(), fileName + ".yml");}
@@ -43,8 +44,8 @@ public class FileManager {
 
     public static void setLocation(YamlConfiguration config, String path, Location loc){
         config.set(path + ".x", loc.getBlockX());
-        config.set(path + ".y", loc.getBlockX());
-        config.set(path + ".z", loc.getBlockX());
+        config.set(path + ".y", loc.getBlockY());
+        config.set(path + ".z", loc.getBlockZ());
         config.set(path + ".yaw", (int) loc.getYaw());
         config.set(path + ".pitch", (int) loc.getPitch());
     }
@@ -52,7 +53,8 @@ public class FileManager {
     public static YamlConfiguration getConfig(String fileName){
         File gameFile = FileManager.get(fileName);
         YamlConfiguration config = YamlConfiguration.loadConfiguration(gameFile);
-        config.options().copyDefaults();
+        config.options().copyDefaults(true);
+
         return config;
     }
 

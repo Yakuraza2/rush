@@ -27,16 +27,16 @@ public class PlayingTimer extends BukkitRunnable {
         if(!rush.isState(GState.PLAYING)) cancel();
 
         if(timer%FileManager.getConfig(rush.getID()).getInt("timers.bronze") == 0){
-            spawnItem(Material.COPPER_INGOT, "bronze");
+            spawnGem(Material.COPPER_INGOT, "bronze");
         }
         if(timer%FileManager.getConfig(rush.getID()).getInt("timers.iron") == 0){
-            spawnItem(Material.IRON_INGOT, "iron");
+            spawnGem(Material.IRON_INGOT, "iron");
         }
         if(timer%FileManager.getConfig(rush.getID()).getInt("timers.gold") == 0){
-            spawnItem(Material.GOLD_INGOT, "gold");
+            spawnGem(Material.GOLD_INGOT, "gold");
         }
         if(timer%FileManager.getConfig(rush.getID()).getInt("timers.diamond") == 0){
-            spawnItem(Material.DIAMOND, "diamond");
+            spawnGem(Material.DIAMOND, "diamond");
         }
 
         /*if(timer%FileManager.getConfig(rush.getID()).getInt("timers.player-zone-verif")==0){
@@ -70,8 +70,8 @@ public class PlayingTimer extends BukkitRunnable {
         timer++;
     }
 
-    private void spawnItem(Material material, String name){
-        for(String teamID : FileManager.getConfig(rush.getID()).getStringList("teams")){
+    private void spawnGem(Material material, String name){
+        for(String teamID : FileManager.getConfig(rush.getID()).getStringList("team-list")){
             Location Loc = rush.getTeam(teamID).getItemsSpawners();
             Loc.getWorld().dropItem(Loc, ItemsManager.create(material, FileManager.getConfig().getString("shops.display-names." + name), 1));
         }

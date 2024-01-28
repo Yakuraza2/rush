@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class ShopManager {
 
-    private static HashMap<String, Inventory> shopList = new HashMap<>();
+    private static final HashMap<String, Inventory> shopList = new HashMap<>();
 
     public static void loadShops() {
         Core.logger(1, "création des shops ");
@@ -26,6 +26,7 @@ public class ShopManager {
             int size = FileManager.getConfig("shops").getInt(shopID + ".size");
             String displayName = FileManager.getConfig("shops").getString(shopID + ".display-name");
 
+            assert displayName != null;
             Inventory inventory = Bukkit.createInventory(null, size, displayName);
 
             for(String itemID : FileManager.getConfig("shops").getStringList("shops." + shopID + ".items")){

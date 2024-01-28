@@ -15,25 +15,23 @@ public class GameManager {
         return Core.getWaitingList().get(0);
     }
 
-    public static void Join(Player p, Rush rush){
+    public static boolean Join(Player p, Rush rush){
 
-        if(rush == null) return;
+        if(rush == null) return false;
 
-        if(rush.getAutoStart().isCancelled()) rush.getAutoStart().runTaskTimer(Core.getPlugin(Core.class), 0, 20);
+        if(rush.getPlayers().isEmpty()) rush.getAutoStart().runTaskTimer(Core.getPlugin(Core.class), 0, 20);
 
         rush.addPlayer(p);
+        Core.playersRush.put(p, rush);
         rush.spawnPlayer(p);
         for(Player player : rush.getPlayers()){
             player.sendMessage(FileManager.getConfigMessage("join-message", p, rush));
         }
+        return true;
     }
 
     public static void Quit(Player p, Rush rush){
         rush.removePlayer(p);
-    }
-
-    public static void giveSpawnKit(Player player) {
-
     }
 
     public static void putHealBoost(Player player) {

@@ -86,20 +86,20 @@ public final class Core extends JavaPlugin {
 
     public static List<Rush> getWaitingList() { return waitingList; }
 
-    public static void loadGames(){
+    public static boolean loadGames(){
         logger(1, "Chargement des parties de rush...");
         File file = FileManager.get("rush-list");
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        for(String game : config.getStringList("list")){
+        for(String game : config.getStringList("rush-list")){
             loadGame(game);
         }
+        return true;
     }
     public static void loadGame(String name){
         logger(1, "Chargement de " + name + "...");
         Rush rush = new Rush(name);
         rushs.put(name, rush);
-        addRushToList(name, rush);
         addToWaiting(rush); //By default, a game is at Waiting State.
     }
 
@@ -110,6 +110,11 @@ public final class Core extends JavaPlugin {
         FileManager.set(config, rush_id + ".world", p.getWorld().getName());
         FileManager.setLocation(config,rush_id + ".lobby", p.getLocation());
         FileManager.setLocation(config,rush_id + ".spectator-spawn", p.getLocation());
+        FileManager.set(config, rush_id + ".timer", 20);
+        FileManager.set(config, "timers.bronze", 5);
+        FileManager.set(config, "timers.iron", 15);
+        FileManager.set(config, "timers.gold", 20);
+        FileManager.set(config, "timers.diamond", 30);
 
         FileManager.save(config, FileManager.get(rush_id));
     }

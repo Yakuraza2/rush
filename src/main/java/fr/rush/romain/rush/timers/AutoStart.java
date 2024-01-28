@@ -9,7 +9,9 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public class AutoStart extends BukkitRunnable {
 
@@ -23,16 +25,17 @@ public class AutoStart extends BukkitRunnable {
 
     @Override
     public void run() {
+        if(rush.getPlayers().isEmpty()) { cancel(); return;}
+
         if(rush.getPlayers().size() < rush.getSlots()){
             if(timer > 5) timer=0;
             if(!rush.isState(GState.WAITING_FOR_PLAYERS)) rush.setState(GState.WAITING_FOR_PLAYERS);
-            if(rush.getPlayers().isEmpty())return;
             if(timer==0) rush.broadcast(FileManager.getConfigMessage("slots-not-full", rush));
             timer++;
             return;
         }
         if(rush.isState(GState.WAITING_FOR_PLAYERS)) {
-            timer = FileManager.getConfig(rush.getID()).getInt("timers.starting");
+            timer = rush.getTimer();
             rush.setState(GState.STARTING);
         }
 
@@ -60,22 +63,25 @@ public class AutoStart extends BukkitRunnable {
             playingTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
 
 
-            List<String> teams = FileManager.getConfig(rush.getID()).getStringList("teams");
-            int i = 0;
+            Collection<Team> teams = rush.getTeams().values();
             for(Player player : rush.getPlayers()){
-                Team team = rush.getTeam(teams.get(i));
+                Core.logger("Liste des teams: " + teams);
+                for(Team team : teams){
+                    if(team.getPlayers().size() >= team.getSize()) {
+                        player.sendMessage(FileManager.getConfigMessage("starting", rush));
+                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
 
-                player.sendMessage(FileManager.getConfigMessage("starting", rush));
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
+                        Core.logger(player.getName() + " a rejoint l'équipe " + team.getDisplayName());
 
-                Core.logger(player.getName() + " a rejoint l'équipe " + team.getDisplayName());
+                        rush.setPlayerTeam(player, team);
+                        team.addPlayer(player);
+                        rush.addAlivePlayer(player);
 
-                team.addPlayer(player);
-                rush.addAlivePlayer(player);
+                        rush.spawnPlayer(player);
+                        break;
+                    }
+                }
 
-                rush.spawnPlayer(player);
-
-                if(team.getPlayers().size() >= team.getSize()) i++;
             }
             cancel();
         }
