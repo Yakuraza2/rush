@@ -5,14 +5,18 @@ import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
 import fr.rush.romain.rush.managers.ShopManager;
 import fr.rush.romain.rush.objects.Rush;
+import fr.rush.romain.rush.objects.Team;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -52,45 +56,46 @@ public class RushListener implements Listener {
         Rush rush = Core.playersRush.get(p);
 
         if (rush.isState(GState.PLAYING)) {
-            rush.eliminatePlayer(p);
+            rush.eliminatePlayer(p, rush.getPlayerTeam(p));
         }
         Core.playersRush.remove(p);
         rush.removePlayer(p);
         rush.broadcast(p.getName() + " a quitté la partie");
     }
 
-    /*@EventHandler
+    @EventHandler
     public void onBreak(BlockBreakEvent e){
         Player player = e.getPlayer();
+        Rush rush = Core.playersRush.get(player);
+        Team playerTeam = rush.getPlayerTeam(player);
 
-        if(!(main.isState(GState.PLAYING) && main.getPlayers().contains(player)) && !player.hasPermission("rush.admin")) {
-            player.sendMessage(main.getConfigMessage("no-break", player));
+        Material brokenBlockMaterial = e.getBlock().getType();
+
+        // Prevent players from grief the map if they are in lobby or if the game is finish
+        if(!rush.isState(GState.PLAYING) && !player.hasPermission("rush.admin")) {
+            player.sendMessage(FileManager.getConfigMessage("no-break", rush));
             e.setCancelled(true);
             return;
         }
 
-        if(e.getBlock().getBlockData().getMaterial() == YELLOW_BED){
-            PlayingListener.YellowBedBreak(player, e);
+        if(!brokenBlockMaterial.name().toLowerCase().contains("bed")) return;
 
-            if(e.isCancelled()) return;
-            for(Player joueurs : main.getPlayers()){
-                joueurs.playSound(player, Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1, 1);
+        if(brokenBlockMaterial.equals(Material.BROWN_BED)) GameManager.BrownBedBreak(player, rush, playerTeam);
+
+        //else, go found the team's destroyed bed
+        for(Team team : rush.getTeams().values()){
+            if(brokenBlockMaterial.equals(team.getBedMaterial())){
+                if(team.equals(playerTeam)){
+                    e.setCancelled(true);
+                    player.sendMessage(FileManager.getConfigMessage("ally-bed-destroy", rush));
+                    return;
+                }
+                team.breakBed(player, rush);
+                return;
             }
         }
 
-        if(e.getBlock().getBlockData().getMaterial() == Material.PURPLE_BED){
-            PlayingListener.PurpleBedBreak(player, e);
-
-            if(e.isCancelled()) return;
-            for(Player joueurs : main.getPlayers()){
-                joueurs.playSound(joueurs, Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1, 1);
-            }
-        }
-
-        if(e.getBlock().getBlockData().getMaterial() == Material.BROWN_BED){
-            PlayingListener.BrownBedBreak(player, e);
-        }
-    }*/
+    }
 
     @EventHandler
     public void OnPlace(BlockPlaceEvent e) {
@@ -177,5 +182,89 @@ public class RushListener implements Listener {
         }
 
     }
+
+    @EventHandler
+    public void onDamage(EntityDamageEvent e){
+        if(e instanceof EntityDamageByEntityEvent) return;
+        if(e.getEntity() instanceof Player){
+            Player player = (Player) e.getEntity();
+            Core.logger("Damage détéctés sur " + player.getName());
+
+            Rush rush = Core.playersRush.getOrDefault(player, null);
+            if(rush == null) return;
+
+            if(!rush.isState(GState.PLAYING) && rush.getPlayers().contains(player)){
+                e.setCancelled(true);
+                return;
+            }
+
+            if(player.getHealth()<=e.getDamage()){
+                Core.logger("Mort de " + player.getName() + " d'origine inconnue");
+                e.setDamage(0);
+                rush.broadcast(FileManager.getConfigMessage("death", player, rush));
+
+                rush.killPlayer(player);
+            }
+        }
+    }
+    @EventHandler
+    public void onPvp(EntityDamageByEntityEvent e){
+        Entity damaged = e.getEntity();
+        if(damaged instanceof Player) {
+            Player victim = (Player) damaged;
+
+
+            Rush rush = Core.playersRush.getOrDefault(victim, null);
+
+            if(rush == null) return;
+
+            Entity damager = e.getDamager();
+            Player killer = victim;
+
+            Core.logger("PVP détéctés sur " + victim.getName());
+
+            if (victim.getHealth() <= e.getDamage()) {
+
+                Core.logger("Mort par PVP détéctés sur " + victim.getName());
+                if (damager instanceof Player) {
+                    killer = (Player) damager;
+                }
+                if (damager instanceof Arrow) {
+                    Arrow arrow = (Arrow) damager;
+                    if (arrow.getShooter() instanceof Player) {
+                        killer = ((Player) arrow.getShooter());
+                    }
+                }
+                if(!(rush.isState(GState.PLAYING) && rush.getAlivePlayers().contains(killer))){
+                    e.setCancelled(true);
+                    killer.sendMessage(FileManager.getConfigMessage("no-pvp", killer, rush));
+                    return;
+                }
+
+                Core.logger("Le tueur de " + victim.getName() + " est : " + killer.getName());
+
+                killer.sendMessage(FileManager.getConfigMessage("killer-message", victim, rush));
+                killer.playSound(killer.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2, 1);
+                Bukkit.broadcastMessage(FileManager.getConfigMessage("killed-by-player", victim, rush).replaceAll("<killer>", killer.getName()));
+                e.setDamage(0);
+                rush.killPlayer(victim);
+                rush.addKills(killer, 1);
+            }
+        } else if (e.getEntity() instanceof Villager) {
+            e.setCancelled(true);
+            Entity entity = e.getEntity();
+            Player player = (Player) e.getDamager();
+            Rush rush = Core.playersRush.getOrDefault(player, null);
+
+            if (rush == null || !(rush.isState(GState.PLAYING)) || !(entity.getScoreboardTags().contains("rush")))
+                return;
+
+            e.setCancelled(true);
+            for (String shopID : FileManager.getConfig("shops").getStringList("shops")) {
+                if (entity.getScoreboardTags().contains(shopID)) player.openInventory(ShopManager.get(shopID));
+            }
+        }
+    }
+
     private boolean isPlaying(Player p) { return Core.playersRush.containsKey(p);}
 }

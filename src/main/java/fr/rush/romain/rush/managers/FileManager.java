@@ -37,7 +37,7 @@ public class FileManager {
 
     public static File get(String fileName){return new File(Core.getPluginDataFolder(), fileName + ".yml");}
 
-    public static void set(YamlConfiguration config, String path, int value){  set(config, path, "" + value); }
+    public static void set(YamlConfiguration config, String path, int value){  config.set(path, value); }
     public static void set(YamlConfiguration config, String path, String value) {
         config.set(path, value);
     }
@@ -63,15 +63,14 @@ public class FileManager {
     }
 
     public static String prefix(){
-        return getConfig("config").getString("messages.prefix") + " ";
+        return getConfig().getString("messages.prefix") + " ";
     }
 
     public static String getConfigMessage(String path, Player player, boolean prefix, Rush rush, int timer){
         String message = " ";
 
-        if(prefix){
-            message = prefix() + getConfig("config").getString("messages." + path);
-        }else{message = getConfig("config").getString("messages." + path);}
+        if(prefix) message = prefix() + getConfig().getString("messages." + path);
+        else message = getConfig().getString("messages." + path);
 
         if(player != null) message = message.replaceAll("<player>", player.getName());
 
@@ -80,7 +79,14 @@ public class FileManager {
             message = message.replaceAll("<slots>", rush.getSlots() + "");
             message = message.replaceAll("<onlines>", rush.getPlayers().size() + "");
         }
-        return message;
+        try{
+            return message.replaceAll("&", "§");
+        } catch(NullPointerException e){
+            e.fillInStackTrace();
+            Core.logger(4, "NullPointerException during searching of " + path + " message. message not found.");
+            return "§cError: message not found";
+        }
+
     }
 
     public static String getConfigMessage(String path, Player player, Rush rush){ return getConfigMessage(path, player, true, rush, 0); }

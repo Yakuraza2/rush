@@ -30,6 +30,8 @@ public class Rush {
     private final int aTimer;
 
     private final AutoStart autoStart;
+    private final HashMap<Player, Integer> playerKills = new HashMap<>();
+    private final HashMap<Player, Integer> playerDeaths = new HashMap<>();
 
     public Rush(String rush_id){
         aSlots = 0;
@@ -114,7 +116,7 @@ public class Rush {
         //tabList.present(player);
 
         if(this.isState(GState.PLAYING)){
-            GameManager.putHealBoost(player);
+            Team.applyHealBoost(player, this);
 
             getPlayerTeam(player).spawnPlayer(player);
 
@@ -140,16 +142,17 @@ public class Rush {
     }
 
     public void killPlayer(Player player){
+        Team playerTeam = this.getPlayerTeam(player);
 
         Core.logger("Le joueur " + player.getName() + " est mort.");
-        //main.addDeath(player);
+        this.playerDeaths.put(player, this.getDeaths(player) + 1);
 
-
+        if(playerTeam.hasBed()) spawnPlayer(player);
+        else eliminatePlayer(player, playerTeam);
     }
 
-    public void eliminatePlayer(Player player){
+    public void eliminatePlayer(Player player, Team playerTeam){
         getAlivePlayers().remove(player);
-        Team playerTeam = this.getPlayerTeam(player);
         playerTeam.removePlayer(player);
 
         if(playerTeam.getPlayers().isEmpty()){
@@ -167,7 +170,7 @@ public class Rush {
         int alives = 0;
         Team winners = null;
 
-        for(String team : FileManager.getConfig(this.aRush_id).getStringList("teams")){
+        for(String team : FileManager.getConfig(this.aRush_id).getStringList("teams.list")){
             if(!getTeam(team).isEliminated()) {
                 alives += 1;
                 winners = getTeam(team);
@@ -183,8 +186,15 @@ public class Rush {
         }
 
         this.broadcast(FileManager.getConfigMessage("winning-broadcast", this).replaceAll("<team>", winners.getDisplayName()));
+        this.setState(GState.FINISH);
 
     }
 
     public int getTimer() { return aTimer; }
+
+    public int getKills(Player p) { return this.playerKills.getOrDefault(p, 0); }
+
+    public int getDeaths(Player p) { return this.playerDeaths.getOrDefault(p, 0); }
+
+    public void addKills(Player p, int kills) { playerKills.put(p, kills + this.getKills(p)); }
 }

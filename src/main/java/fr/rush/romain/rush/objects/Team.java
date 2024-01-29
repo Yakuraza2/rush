@@ -1,13 +1,15 @@
 package fr.rush.romain.rush.objects;
 
+import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static org.bukkit.Material.YELLOW_BED;
 
 public class Team {
 
@@ -16,19 +18,22 @@ public class Team {
     private final Location aSpawn;
     private int aSize;
     private final String team_id;
+    private final Material aBedMaterial;
 
     private String DisplayName;
+    private final String rushID;
 
     private boolean bedStatus;
     private boolean eliminated;
     private final int[] aColor;
+    private int aHealBoost = 0;
 
     public Team(String rush, String name){
         String path = "teams." + name;
 
         aPlayer = new ArrayList<>();
         aSize= FileManager.getConfig(rush).getInt(path + ".slots");
-        DisplayName =  FileManager.getConfig(rush).getString(path + ".display-name");
+        DisplayName =  FileManager.getConfig(rush).getString(path + ".display-name").replace("&","§");
         team_id = name;
 
         World world = Bukkit.getWorld(FileManager.getConfig(rush).getString(rush + ".world"));
@@ -49,8 +54,10 @@ public class Team {
         int g = FileManager.getConfig(rush).getInt(path + ".color.green");
         int b = FileManager.getConfig(rush).getInt(path + ".color.blue");
 
-
+        aBedMaterial = Material.matchMaterial(FileManager.getConfig(rush).getString("teams." + team_id + ".bed-material"));
         aColor = new int[]{r, g, b};
+
+        rushID = rush;
 
         bedStatus = true;
         eliminated = false;
@@ -88,6 +95,7 @@ public class Team {
 
     public boolean isEliminated() { return eliminated; }
     public void eliminate() {
+        Core.logger("l'équipe " + this.team_id + " de " + this.rushID + " a été éliminée !");
         this.eliminated = true;
     }
 
@@ -96,13 +104,40 @@ public class Team {
         return aColor;
     }
 
+    public String getId() {
+        return team_id;
+    }
+
+    public Material getBedMaterial() { return aBedMaterial; }
+
     public void broadcast(String message){
         for(Player p : this.getPlayers()){
             p.sendMessage(message);
         }
     }
 
-    public String getId() {
-        return team_id;
+    public void breakBed(Player p, Rush rush){
+        this.setBed(false);
+        for(Player player : rush.getPlayers()){
+            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1, 1);
+        }
+
+    }
+
+    public int getHealBoost() { return this.aHealBoost; }
+    public void setHealBoost(int healBoost) { this.aHealBoost = healBoost; }
+    public void addHealBoost(int healBoost) {
+        this.aHealBoost += healBoost;
+        this.applyHealBoost();
+    }
+
+    public void applyHealBoost() {
+        for(Player player : this.getPlayers()){
+            player.setMaxHealth(20 + 2*this.getHealBoost());
+        }
+    }
+
+    public static void applyHealBoost(Player p, Rush rush) {
+        p.setMaxHealth(20 + 2*rush.getPlayerTeam(p).getHealBoost());
     }
 }

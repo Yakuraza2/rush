@@ -23,6 +23,10 @@ messages:
   yellow-team: "§eJAUNE"
   purple-team: "§5VIOLETTE"
 
+  global-chat: "§bGLOGAL: §f<team> §f| <player> §f: §7"
+  team-chat: "§bTEAM: §f<player> §b: §f"
+  spectator-chat: "§7SPECTATOR <player> : §7§i"
+
   admin:
     slots: "Nouveau nombre de slots défini à <slots> !"
     lobby: ""
@@ -36,19 +40,6 @@ messages:
   errors:
     buy: "§cUne erreur est survenue lors du retrait de vos <item>s, veulliez contacter un Staff !"
 
-timers:
-  starting: 20
-  finishing: 30
-  player-zone-verif: 1
-  bronze: 2
-  iron: 10
-  gold: 25
-  diamond: 45
-
-gui:
-  display-names:
-    yellow: "§6[§eJaune§6] §b"
-    purple: "§1[§5Violet§1] §b"
 
 shops:
     gui-name: "§dShop §eRush"

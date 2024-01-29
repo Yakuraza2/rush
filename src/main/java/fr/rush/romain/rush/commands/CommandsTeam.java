@@ -57,6 +57,8 @@ public class CommandsTeam implements CommandExecutor {
             FileManager.set(config, "teams." + teamID + ".color.green", (int) (Math.random()*255));
             FileManager.set(config, "teams." + teamID + ".color.blue", (int) (Math.random()*255));
 
+            FileManager.set(config, "teams." + teamID + ".bed-material", "BLACK_BED");
+
             FileManager.save(config, FileManager.get(rushID));
 
             return true;
@@ -117,6 +119,7 @@ public class CommandsTeam implements CommandExecutor {
                 break;
             case "item-spawner":
                 FileManager.setLocation(config, "teams." + team_id + ".item-spawner", player.getLocation());
+                currentTeam.setItemsSpawners(player.getLocation());
                 break;
             default:
                 player.sendMessage("Given setting doesn't exists !");

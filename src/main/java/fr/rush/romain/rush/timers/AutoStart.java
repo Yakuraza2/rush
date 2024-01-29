@@ -59,15 +59,11 @@ public class AutoStart extends BukkitRunnable {
 
             Core.logger("Lancement des spawners à items");
 
-            PlayingTimer playingTimer = new PlayingTimer(rush);
-            playingTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
-
-
             Collection<Team> teams = rush.getTeams().values();
             for(Player player : rush.getPlayers()){
                 Core.logger("Liste des teams: " + teams);
                 for(Team team : teams){
-                    if(team.getPlayers().size() >= team.getSize()) {
+                    if(!(team.getPlayers().size() >= team.getSize())) {
                         player.sendMessage(FileManager.getConfigMessage("starting", rush));
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 2);
 
@@ -80,9 +76,13 @@ public class AutoStart extends BukkitRunnable {
                         rush.spawnPlayer(player);
                         break;
                     }
+                    Core.logger(team.getId() + " is full !");
                 }
 
             }
+            PlayingTimer playingTimer = new PlayingTimer(rush);
+            playingTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
+
             cancel();
         }
 

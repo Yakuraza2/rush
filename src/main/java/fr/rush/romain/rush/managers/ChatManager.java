@@ -7,15 +7,13 @@ public class ChatManager {
 
     public static void sendTeamMessage(Player p, Rush rush, String msg){
         rush.getPlayerTeam(p).broadcast(FileManager.getConfigMessage("team-chat", p, false, rush, 0)
-                .replace("<team>", FileManager.getConfig(rush.getID()).getString(rush.getID() + ".teams."
-                        + rush.getPlayerTeam(p).getId() + ".display-name") + " " + msg));
+                .replace("<team>", FileManager.getConfig(rush.getID()).getString(".teams." + rush.getPlayerTeam(p).getId() + ".display-name") + " " + msg));
     }
 
     public static void sendMessage(Player p, Rush rush, String msg, boolean teams){
-        String replace;
-        if(teams) replace = FileManager.getConfig(rush.getID()).getString(rush.getID() + ".teams." + rush.getPlayerTeam(p).getId() + ".display-name");
-        else replace = "";
-        for(Player players : rush.getAlivePlayers()){
+        String replace = "";
+        if(teams) replace = FileManager.getConfig(rush.getID()).getString("teams." + rush.getPlayerTeam(p).getId() + ".display-name");
+        for(Player players : rush.getPlayers()){
             players.sendMessage(FileManager.getConfigMessage("global-chat", p, rush, false)
                     .replace("<team>", replace) + " " + msg);
         }

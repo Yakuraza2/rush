@@ -1,8 +1,10 @@
 package fr.rush.romain.rush.timers;
 
+import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.managers.ItemsManager;
 import fr.rush.romain.rush.managers.FileManager;
+import fr.rush.romain.rush.managers.ScoreBoardManager;
 import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -63,15 +65,21 @@ public class PlayingTimer extends BukkitRunnable {
                 }
             }
         }*/
-        //ScoreboardsManager sc = new ScoreboardsManager(main);
         for(Player player : rush.getPlayers()){
-            //sc.updateScoreboard(player, timer);
+            ScoreBoardManager.updateScoreboard(player, rush, timer);
         }
         timer++;
+
+        if(rush.isState(GState.FINISH)){
+            FinishTimer finishTimer = new FinishTimer(rush);
+            finishTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
+
+            cancel();
+        }
     }
 
     private void spawnGem(Material material, String name){
-        for(String teamID : FileManager.getConfig(rush.getID()).getStringList("team-list")){
+        for(String teamID : FileManager.getConfig(rush.getID()).getStringList("teams.list")){
             Location Loc = rush.getTeam(teamID).getItemsSpawners();
             Loc.getWorld().dropItem(Loc, ItemsManager.create(material, FileManager.getConfig().getString("shops.display-names." + name), 1));
         }

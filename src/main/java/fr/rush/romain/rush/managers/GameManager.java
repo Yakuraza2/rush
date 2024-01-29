@@ -2,6 +2,7 @@ package fr.rush.romain.rush.managers;
 
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.objects.Rush;
+import fr.rush.romain.rush.objects.Team;
 import org.bukkit.entity.Player;
 
 public class GameManager {
@@ -34,6 +35,7 @@ public class GameManager {
         rush.removePlayer(p);
     }
 
-    public static void putHealBoost(Player player) {
+    public static void BrownBedBreak(Player player, Rush rush, Team team) {
+                team.addHealBoost(1);
     }
 }
