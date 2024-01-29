@@ -17,20 +17,22 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class Commands implements CommandExecutor {
-    public Commands(Core main) {
+public class CommandsRush implements CommandExecutor {
+    public CommandsRush(Core main) {
     }
     @Override
     public boolean onCommand(@NotNull CommandSender player, @NotNull Command command, @NotNull String s, String[] args) {
         Player p = (Player) player;
         boolean succeeded = false;
 
-        if(args.length == 0) player.sendMessage("§cUsage: /rush <command> <rush_id> <parameter>");
+        if(args.length == 0) {
+            player.sendMessage("§cUsage: /rush <command> <rush_id> <parameter>");
+            return false;
+        }
         if(args[0].equalsIgnoreCase("list")) succeeded = commandList(p, args);
         if(args[0].equalsIgnoreCase("join")) succeeded = GameManager.Join(p, GameManager.selectRush());
         if(args[0].equalsIgnoreCase("reload")) succeeded = Core.loadGames();
         if(args[0].equalsIgnoreCase("create")) succeeded = commandCreate(p, args);
-        if(args[0].equalsIgnoreCase("spawnshop")) succeeded = commandSpawnShop(p, args);
         if(args[0].equalsIgnoreCase("set")) succeeded = commandSet(p, args);
 
 
@@ -59,34 +61,6 @@ public class Commands implements CommandExecutor {
 
         p.sendMessage("Commande non reconnue");
         return false;
-    }
-
-    private boolean commandSpawnShop(Player p, String[] args) {
-        if(args.length <= 2) {
-            p.sendMessage("Incorrect Usage ! /rush spawnshop <shop_id> <Villager's name>");
-            return false;
-        }
-        World world = p.getWorld();
-        Location loc = p.getLocation();
-        String shopID = args[1];
-
-        if(!ShopManager.exists(shopID)) p.sendMessage(shopID + " n'existe pas !");
-
-        Villager categoriesEntity = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
-        categoriesEntity.setProfession(Villager.Profession.ARMORER);
-        categoriesEntity.setCustomNameVisible(true);
-        categoriesEntity.setAI(false);
-        categoriesEntity.setInvulnerable(true);
-        categoriesEntity.addScoreboardTag(shopID);
-        categoriesEntity.addScoreboardTag("shop");
-
-        StringBuilder str = new StringBuilder();
-        for(int i =2; i< args.length; i++){
-            str.append(args[i]).append(" ");
-        }
-
-        categoriesEntity.setCustomName(str.toString());
-        return true;
     }
 
     private boolean commandCreate(Player player, String[] args) {

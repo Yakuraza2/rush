@@ -1,11 +1,11 @@
 package fr.rush.romain.rush;
 
-import fr.rush.romain.rush.commands.Commands;
+import fr.rush.romain.rush.commands.CommandsRush;
+import fr.rush.romain.rush.commands.CommandsShop;
 import fr.rush.romain.rush.commands.CommandsTeam;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.ShopManager;
 import fr.rush.romain.rush.objects.Rush;
-import fr.rush.romain.rush.objects.ShopItem;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -37,8 +37,9 @@ public final class Core extends JavaPlugin {
         pm.registerEvents(new RushListener(this), this);
 
         logger("Initialisation des commandes");
-        getCommand("rush").setExecutor(new Commands(this));
+        getCommand("rush").setExecutor(new CommandsRush(this));
         getCommand("team").setExecutor(new CommandsTeam(this));
+        getCommand("shop").setExecutor(new CommandsShop(this));
 
         //créer tous les objets <parties de rush> via une procedure pour pouvoir aussi les reload
         loadGames();
@@ -110,7 +111,8 @@ public final class Core extends JavaPlugin {
         FileManager.set(config, rush_id + ".world", p.getWorld().getName());
         FileManager.setLocation(config,rush_id + ".lobby", p.getLocation());
         FileManager.setLocation(config,rush_id + ".spectator-spawn", p.getLocation());
-        FileManager.set(config, rush_id + ".timer", 20);
+        FileManager.set(config, "timers.lobby-waiting", 20);
+        FileManager.set(config, "timers.finish-waiting", 20);
         FileManager.set(config, "timers.bronze", 5);
         FileManager.set(config, "timers.iron", 15);
         FileManager.set(config, "timers.gold", 20);

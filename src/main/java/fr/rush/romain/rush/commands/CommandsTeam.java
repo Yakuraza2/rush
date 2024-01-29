@@ -20,67 +20,27 @@ public class CommandsTeam implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-
+        boolean succeeded = false;
         Player player = (Player) sender;
-        if (args.length < 1) {
-            player.sendMessage("Invalid Command !");
-            return false;
-        }
+        if (args.length < 1) player.sendMessage("Invalid Command !");
 
-        if (args[0].equalsIgnoreCase("add")) {
-            if (args.length != 4) {
-                player.sendMessage("§cUsage: /team add <rush_id> <team_id> <display-name>");
-                return false;
-            }
+        if (args[0].equalsIgnoreCase("add")) succeeded = commandAdd(player, args);
+        if(args[1].equalsIgnoreCase("set")) succeeded = commandSet(player, args);
 
-            String teamID = args[2].toLowerCase();
-            String rushID = args[1].toLowerCase();
-            YamlConfiguration config = FileManager.getConfig(rushID);
+        return succeeded;
+    }
 
-            if (!Core.getRushsList().containsKey(rushID)) {
-                player.sendMessage("Le Rush \"" + rushID + "\" semble ne pas exister !");
-                return true;
-            }
-            //Adding the team to the rush's team-list
-            List<String> list = config.getStringList("teams.list");
-            list.add(teamID);
-            config.set("teams.list", list);
-
-            //refaire comme pour la creation de RUSH !
-            FileManager.set(config, "teams." + teamID + ".display-name", args[3]);
-            FileManager.set(config, "teams." + teamID + ".slots", 2);
-            FileManager.set(config, "teams." + teamID + ".color", "YELLOW");
-            FileManager.setLocation(config, "teams." + teamID + ".spawn", player.getLocation());
-            FileManager.setLocation(config, "teams." + teamID + ".item-spawner", player.getLocation());
-
-            FileManager.set(config, "teams." + teamID + ".color.red", (int) (Math.random()*255));
-            FileManager.set(config, "teams." + teamID + ".color.green", (int) (Math.random()*255));
-            FileManager.set(config, "teams." + teamID + ".color.blue", (int) (Math.random()*255));
-
-            FileManager.set(config, "teams." + teamID + ".bed-material", "BLACK_BED");
-
-            FileManager.save(config, FileManager.get(rushID));
-
-            return true;
-        }
-
-        /**
-         ** CHANGEMENT DES ATTRIBUTS D'UNE TEAM
-         ** Sous la forme /team [rush_id] set [attribut] [valeur]
-         **/
+    private boolean commandSet(Player player, String[] args) {
 
         if (args.length < 4) {
             player.sendMessage("Incorrect Usage: /team [rush_id] set [team] [setting] [value]");
-            return false;
-        }
-        if(!args[1].equalsIgnoreCase("set")) {
-            player.sendMessage("Unknown command !");
             return false;
         }
 
         String rush_id = args[0];
         String attribut = args[3];
         String team_id = args[2];
+
         StringBuilder str = new StringBuilder();
         if(args.length > 4){
             str.append(args[4]);
@@ -89,21 +49,15 @@ public class CommandsTeam implements CommandExecutor {
         String value = str.toString();
 
 
-        if (!FileManager.getConfig("rush-list").getStringList("rush-list").contains(rush_id)) {
+        if (!FileManager.getConfig("rush-list").getStringList("rush-list").contains(rush_id))
             player.sendMessage("Le Rush \"" + rush_id + "\" semble ne pas exister !");
-            return true;
-        }
 
         Rush currentRush = Core.getRushsList().get(rush_id);
+        YamlConfiguration config = FileManager.getConfig(rush_id);
 
-        if (!FileManager.getConfig(rush_id).getStringList("teams.list").contains(team_id)) {
-            player.sendMessage("L'équipe \"" + team_id + "\" semble ne pas exister pour " + rush_id + " !");
-            return true;
-        }
+        if (!config.getStringList("teams.list").contains(team_id)) player.sendMessage("L'équipe \"" + team_id + "\" semble ne pas exister pour " + rush_id + " !");
 
         Team currentTeam = currentRush.getTeam(team_id);
-
-        YamlConfiguration config = FileManager.getConfig(rush_id);
 
         switch (attribut) {
             case "slots":
@@ -129,7 +83,37 @@ public class CommandsTeam implements CommandExecutor {
 
         FileManager.save(config, FileManager.get(rush_id));
         player.sendMessage("Vous avez changé la valeur de " + attribut + " a " + value);
+        return true;
+    }
 
+    private boolean commandAdd(Player player, String[] args) {
+        if (args.length != 4) {
+            player.sendMessage("§cUsage: /team add <rush_id> <team_id> <display-name>");
+            return false;
+        }
+        String teamID = args[2].toLowerCase();
+        String rushID = args[1].toLowerCase();
+        YamlConfiguration config = FileManager.getConfig(rushID);
+
+        if (!Core.getRushsList().containsKey(rushID)) player.sendMessage("Le Rush \"" + rushID + "\" semble ne pas exister !");
+        //Adding the team to the rush's team-list
+        List<String> list = config.getStringList("teams.list");
+        list.add(teamID);
+        config.set("teams.list", list);
+
+        FileManager.set(config, "teams." + teamID + ".display-name", args[3]);
+        FileManager.set(config, "teams." + teamID + ".slots", 2);
+        FileManager.set(config, "teams." + teamID + ".color", "YELLOW");
+        FileManager.setLocation(config, "teams." + teamID + ".spawn", player.getLocation());
+        FileManager.setLocation(config, "teams." + teamID + ".item-spawner", player.getLocation());
+
+        FileManager.set(config, "teams." + teamID + ".color.red", (int) (Math.random()*255));
+        FileManager.set(config, "teams." + teamID + ".color.green", (int) (Math.random()*255));
+        FileManager.set(config, "teams." + teamID + ".color.blue", (int) (Math.random()*255));
+
+        FileManager.set(config, "teams." + teamID + ".bed-material", "BLACK_BED");
+
+        FileManager.save(config, FileManager.get(rushID));
         return true;
     }
 }

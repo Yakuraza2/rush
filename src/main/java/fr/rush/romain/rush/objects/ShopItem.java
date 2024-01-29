@@ -16,6 +16,7 @@ public class ShopItem {
     private final Material aPriceItem;
     private final String aItemID;
     private final int aSlot;
+    private final Material aMaterial;
     private static final HashMap<String, ShopItem> itemList = new HashMap<>();
 
     public ShopItem(String shopID, String itemID){
@@ -23,7 +24,7 @@ public class ShopItem {
 
         String path = "shops." + shopID + ".items." + itemID;
 
-        Material material = Material.valueOf(FileManager.getConfig("shops").getString(path + ".material"));
+        aMaterial = Material.valueOf(FileManager.getConfig("shops").getString(path + ".material"));
         int quantity = FileManager.getConfig("shops").getInt(path + ".quantity");
 
         this.aPrice = FileManager.getConfig("shops").getInt(path + ".price");
@@ -32,7 +33,7 @@ public class ShopItem {
         this.aItemID = itemID;
         this.aDisplayName = FileManager.getConfig("shops").getString(path + ".display-name");
 
-        ItemStack item = new ItemStack(material, quantity);
+        ItemStack item = new ItemStack(aMaterial, quantity);
         ItemMeta itemM = item.getItemMeta();
         itemM.setDisplayName(this.aDisplayName);
 

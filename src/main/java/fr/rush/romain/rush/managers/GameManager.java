@@ -1,6 +1,7 @@
 package fr.rush.romain.rush.managers;
 
 import fr.rush.romain.rush.Core;
+import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Team;
 import org.bukkit.entity.Player;
@@ -25,17 +26,29 @@ public class GameManager {
         rush.addPlayer(p);
         Core.playersRush.put(p, rush);
         rush.spawnPlayer(p);
+        ScoreBoardManager.clearScoreBoard(p);
         for(Player player : rush.getPlayers()){
             player.sendMessage(FileManager.getConfigMessage("join-message", p, rush));
         }
         return true;
     }
 
-    public static void Quit(Player p, Rush rush){
-        rush.removePlayer(p);
-    }
-
     public static void BrownBedBreak(Player player, Rush rush, Team team) {
                 team.addHealBoost(1);
     }
+
+    public static void resetPlayer(Player player) {
+        if (!isPlaying(player)) return;
+
+        Rush rush = Core.playersRush.get(player);
+
+        if (rush.isState(GState.PLAYING) && rush.getAlivePlayers().contains(player)) {
+            rush.eliminatePlayer(player, rush.getPlayerTeam(player));
+            rush.broadcast(player.getName() + " a quitté la partie");
+        }
+        ScoreBoardManager.clearScoreBoard(player);
+        Core.playersRush.remove(player);
+    }
+
+    public static boolean isPlaying(Player p) { return Core.playersRush.containsKey(p);}
 }

@@ -10,14 +10,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class FinishTimer extends BukkitRunnable {
 
-    private static int timer = 0;
-    private static int staticTimer = 0;
+    private int timer;
+    private final int staticTimer;
     private final Rush rush;
     public FinishTimer(Rush pRush) {
 
         this.rush = pRush;
-        timer = (int) FileManager.getConfig().get("timers.finishing");
-        staticTimer = timer;
+        this.staticTimer = FileManager.getConfig(rush.getID()).getInt("timers.finish-waiting");
+        this.timer = this.staticTimer;
     }
 
     @Override
@@ -27,11 +27,13 @@ public class FinishTimer extends BukkitRunnable {
             Core.logger(4, "The finish timer was started during the rush " + rush.getID() + " was not in Finish State !");
             cancel();
         }
-        for(Player winner : rush.getAlivePlayers()){
-            winner.sendMessage(FileManager.getConfigMessage("winners-message", winner, rush));
+        if(this.timer == this.staticTimer) {
+            for (Player winner : rush.getAlivePlayers()) {
+                winner.sendMessage(FileManager.getConfigMessage("winners-message", winner, rush));
+            }
         }
 
-        if(timer==staticTimer/2){
+        if(this.timer==this.staticTimer/2){
             for(Player winner : rush.getAlivePlayers()){
                 winner.setGameMode(GameMode.SPECTATOR);
             }
@@ -39,10 +41,11 @@ public class FinishTimer extends BukkitRunnable {
             rush.broadcast(FileManager.getConfigMessage("last-seconds", rush));
         }
 
-        if(timer <=0){
+        if(this.timer <=0){
             rush.reset();
+            this.timer = this.staticTimer;
             cancel();
         }
-        timer--;
+        this.timer--;
     }
 }

@@ -9,3 +9,6 @@ commands:
   team:
     description: Parametrer les teams
     permission: rush.admin
+  shop:
+    description: Parametrer les shops
+    permission: rush.admin

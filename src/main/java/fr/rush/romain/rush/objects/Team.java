@@ -46,8 +46,8 @@ public class Team {
         aSpawn = new Location(world, x, y ,z, yaw, pitch);
 
         int x2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.x");
-        int y2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.spawn.y");
-        int z2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.spawn.z");
+        int y2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.y");
+        int z2 = FileManager.getConfig(rush).getInt("teams." + name + ".item-spawner.z");
         aItemsSpawners = new Location(world, x2, y2, z2, 1, 1);
 
         int r = FileManager.getConfig(rush).getInt(path + ".color.red");
@@ -139,5 +139,11 @@ public class Team {
 
     public static void applyHealBoost(Player p, Rush rush) {
         p.setMaxHealth(20 + 2*rush.getPlayerTeam(p).getHealBoost());
+    }
+
+    public void reset(){
+        this.getPlayers().clear();
+        this.bedStatus = true;
+        this.eliminated = false;
     }
 }

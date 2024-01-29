@@ -17,29 +17,30 @@ public class PlayingTimer extends BukkitRunnable {
 
     private final Rush rush;
     private int timer = 1;
-
+    private final int bronzeDelay;
+    private final int ironDelay;
+    private final int goldDelay;
+    private final int diamondDelay;
+    private final FinishTimer finishTimer;
     HashMap<Player, Integer> playerTimer = new HashMap<>();
 
     public PlayingTimer(Rush pRush) {
-        rush = pRush;
+        this.rush = pRush;
+        this.bronzeDelay = FileManager.getConfig(rush.getID()).getInt("timers.bronze");
+        this.ironDelay = FileManager.getConfig(rush.getID()).getInt("timers.iron");
+        this.goldDelay = FileManager.getConfig(rush.getID()).getInt("timers.gold");
+        this.diamondDelay = FileManager.getConfig(rush.getID()).getInt("timers.diamond");
+        this.finishTimer = new FinishTimer(pRush);
     }
 
     @Override
     public void run() {
         if(!rush.isState(GState.PLAYING)) cancel();
 
-        if(timer%FileManager.getConfig(rush.getID()).getInt("timers.bronze") == 0){
-            spawnGem(Material.COPPER_INGOT, "bronze");
-        }
-        if(timer%FileManager.getConfig(rush.getID()).getInt("timers.iron") == 0){
-            spawnGem(Material.IRON_INGOT, "iron");
-        }
-        if(timer%FileManager.getConfig(rush.getID()).getInt("timers.gold") == 0){
-            spawnGem(Material.GOLD_INGOT, "gold");
-        }
-        if(timer%FileManager.getConfig(rush.getID()).getInt("timers.diamond") == 0){
-            spawnGem(Material.DIAMOND, "diamond");
-        }
+        if(timer%this.bronzeDelay == 0)  spawnGem(Material.COPPER_INGOT, "bronze");
+        if(timer%this.ironDelay == 0)    spawnGem(Material.IRON_INGOT, "iron");
+        if(timer%this.goldDelay == 0)    spawnGem(Material.GOLD_INGOT, "gold");
+        if(timer%this.diamondDelay == 0) spawnGem(Material.DIAMOND, "diamond");
 
         /*if(timer%FileManager.getConfig(rush.getID()).getInt("timers.player-zone-verif")==0){
             zones Zones = new zones(main);
@@ -71,9 +72,9 @@ public class PlayingTimer extends BukkitRunnable {
         timer++;
 
         if(rush.isState(GState.FINISH)){
-            FinishTimer finishTimer = new FinishTimer(rush);
             finishTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
 
+            this.timer = 1;
             cancel();
         }
     }

@@ -17,10 +17,12 @@ public class AutoStart extends BukkitRunnable {
 
     private int timer;
     private final Rush rush;
+    private final PlayingTimer playingTimer;
 
     public AutoStart(Rush pRush){
         rush = pRush;
         timer = 0;
+        playingTimer = new PlayingTimer(rush);
     }
 
     @Override
@@ -35,17 +37,19 @@ public class AutoStart extends BukkitRunnable {
             return;
         }
         if(rush.isState(GState.WAITING_FOR_PLAYERS)) {
-            timer = rush.getTimer();
+            timer = FileManager.getConfig(rush.getID()).getInt("timers.lobby-waiting");
             rush.setState(GState.STARTING);
         }
 
-        Core.logger("compteur: " + timer + "s");
         for(Player player : rush.getPlayers()){
             player.setLevel(timer);
         }
-        if(timer>=60 && timer%60==0) rush.broadcast(FileManager.prefix() + "§6Le jeu demarre dans §e" + timer/60 + "§6 minutes !");
-        else if(timer%5==0 || timer == 3 || timer == 2 || timer == 1){
+        if(timer>=60 && timer%60==0){
+            rush.broadcast(FileManager.prefix() + "§6Le jeu demarre dans §e" + timer/60 + "§6 minutes !");
+            Core.logger("timer for " + rush.getID() + " : " + timer + "s");
+        } else if(timer%5==0 || timer == 3 || timer == 2 || timer == 1){
             rush.broadcast(FileManager.getConfigMessage("countdown", rush, timer));
+            Core.logger("timer for " + rush.getID() + " : " + timer + "s");
             for(Player player : rush.getPlayers()){
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1, 1);
             }
@@ -56,8 +60,6 @@ public class AutoStart extends BukkitRunnable {
             Core.logger("Passage en PLAYING");
             Core.removeOfWaiting(rush);
             rush.setState(GState.PLAYING);
-
-            Core.logger("Lancement des spawners à items");
 
             Collection<Team> teams = rush.getTeams().values();
             for(Player player : rush.getPlayers()){
@@ -80,7 +82,7 @@ public class AutoStart extends BukkitRunnable {
                 }
 
             }
-            PlayingTimer playingTimer = new PlayingTimer(rush);
+
             playingTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
 
             cancel();

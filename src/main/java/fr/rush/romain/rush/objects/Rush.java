@@ -1,6 +1,7 @@
 package fr.rush.romain.rush.objects;
 
 import fr.rush.romain.rush.managers.InventoryManager;
+import fr.rush.romain.rush.managers.ScoreBoardManager;
 import fr.rush.romain.rush.timers.AutoStart;
 import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.Core;
@@ -27,7 +28,6 @@ public class Rush {
     private final HashMap<Player, Team> playerTeam;
     private int aSlots;
     private GState aState;
-    private final int aTimer;
 
     private final AutoStart autoStart;
     private final HashMap<Player, Integer> playerKills = new HashMap<>();
@@ -60,8 +60,6 @@ public class Rush {
         int yaw2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.yaw");
         int pitch2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.pitch");
         aSpectSpawn = new Location(world, x2, y2, z2, yaw2, pitch2);
-
-        aTimer = FileManager.getConfig(rush_id).getInt(rush_id + ".timer");
         autoStart = new AutoStart(this);
     }
 
@@ -94,7 +92,16 @@ public class Rush {
 
 
     public void reset(){
+        Core.logger(1, "RESET du rush " + this.aRush_id + "...");
+        this.playerDeaths.clear();
+        this.playerKills.clear();
+        this.playerTeam.clear();
 
+        for(Player player : this.getPlayers()) GameManager.resetPlayer(player);
+        for(Team team : this.aTeams.values()) team.reset();
+
+        this.setState(GState.WAITING_FOR_PLAYERS);
+        Core.addToWaiting(this);
     }
 
     public void broadcast(String message){
@@ -189,8 +196,6 @@ public class Rush {
         this.setState(GState.FINISH);
 
     }
-
-    public int getTimer() { return aTimer; }
 
     public int getKills(Player p) { return this.playerKills.getOrDefault(p, 0); }
 

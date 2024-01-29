@@ -50,17 +50,7 @@ public class RushListener implements Listener {
     public void onQuit(PlayerQuitEvent e) {
         e.setQuitMessage("");
         Player p = e.getPlayer();
-
-        if (!isPlaying(p)) return;
-
-        Rush rush = Core.playersRush.get(p);
-
-        if (rush.isState(GState.PLAYING)) {
-            rush.eliminatePlayer(p, rush.getPlayerTeam(p));
-        }
-        Core.playersRush.remove(p);
-        rush.removePlayer(p);
-        rush.broadcast(p.getName() + " a quitté la partie");
+        GameManager.resetPlayer(p);
     }
 
     @EventHandler
@@ -147,7 +137,7 @@ public class RushListener implements Listener {
         String msg = e.getMessage();
 
         if (e.isCancelled()) return;
-        if (!isPlaying(p)) return;
+        if (!GameManager.isPlaying(p)) return;
 
         Rush rush = Core.playersRush.get(p);
 
@@ -172,14 +162,23 @@ public class RushListener implements Listener {
         Entity entity = e.getRightClicked();
         Player player = e.getPlayer();
         Rush rush = Core.playersRush.getOrDefault(player, null);
+        Core.logger("Interact Event");
 
-        if (rush == null || !(rush.isState(GState.PLAYING)) || !(entity.getScoreboardTags().contains("rush")))
+
+        if (rush == null || !(rush.isState(GState.PLAYING)) || !(entity.getScoreboardTags().contains("shop")))
             return;
 
         e.setCancelled(true);
-        for(String shopID : FileManager.getConfig("shops").getStringList("shops")){
-            if(entity.getScoreboardTags().contains(shopID)) player.openInventory(ShopManager.get(shopID));
+        for(String shopID : FileManager.getConfig("shops").getStringList("shops.list")){
+            if(entity.getScoreboardTags().contains(shopID)) {
+                Core.logger("Opening " + shopID + " for " + player.getName());
+                player.openInventory(ShopManager.get(shopID));
+                break;
+            }
         }
+
+        //POUR RECUPERER LE SHOP: TRANSFORMER LE MANAGER EN OBJET -> HASHMAP<DisplayName, Shop>
+        // POUR RECUPERER L'ITEM: HASHMAP PRIVATE DANS LE SHOP <Slot, ShopItem>
 
     }
 
@@ -265,6 +264,4 @@ public class RushListener implements Listener {
             }
         }
     }
-
-    private boolean isPlaying(Player p) { return Core.playersRush.containsKey(p);}
 }

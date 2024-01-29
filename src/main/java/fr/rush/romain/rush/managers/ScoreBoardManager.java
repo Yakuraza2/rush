@@ -85,4 +85,8 @@ public class ScoreBoardManager {
         }
     }
 
+    public static void clearScoreBoard(Player p){
+        p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+    }
+
 }

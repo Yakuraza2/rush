@@ -3,6 +3,7 @@ package fr.rush.romain.rush.managers;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.objects.ShopItem;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 
 import java.util.HashMap;
@@ -13,33 +14,33 @@ public class ShopManager {
 
     public static void loadShops() {
         Core.logger(1, "création des shops ");
-        for(String shopID : FileManager.getConfig("shops").getStringList("shops")){
+        for(String shopID : FileManager.getConfig("shops").getStringList("shops.list")){
             createShop(shopID);
         }
     }
 
     public static void createShop(String shopID){
         Core.logger(1, "création du shop " + shopID);
-
+        YamlConfiguration config = FileManager.getConfig("shops");
         try{
+            int    size        = config.getInt("shops." + shopID + ".size");
+            String displayName = config.getString("shops." + shopID + ".display-name");
 
-            int size = FileManager.getConfig("shops").getInt(shopID + ".size");
-            String displayName = FileManager.getConfig("shops").getString(shopID + ".display-name");
-
-            assert displayName != null;
             Inventory inventory = Bukkit.createInventory(null, size, displayName);
 
-            for(String itemID : FileManager.getConfig("shops").getStringList("shops." + shopID + ".items")){
+            for(String itemID : config.getStringList("shops." + shopID + ".items-list")){
                 ShopItem item = new ShopItem(shopID, itemID);
-
                 inventory.setItem(item.getSlot(), item.getItemStack());
             }
+
             Core.logger(1, shopID + " créé !");
             shopList.put(shopID, inventory);
 
         } catch(IllegalArgumentException e) {
             e.fillInStackTrace();
-            Core.logger(4, "Erreur de chargement de " + shopID + " : le fichier shops.yml semble incomplet !");
+            Core.logger(4, "Error during loading of " + shopID + " : shops.yml file seems unfinished");
+            Core.logger(4, "HELP: Verify shops' sizes: it must be multiples of 9");
+            Core.logger(4, "HELP: Verify price-items -> item id need to be the perfect one !");
         } catch (Exception e){
             e.fillInStackTrace();
             Core.logger(4, "Erreur de chargement de " + shopID);
@@ -48,6 +49,8 @@ public class ShopManager {
     }
 
     public static boolean exists(String id) { return shopList.containsKey(id); }
+
+    public static HashMap<String, Inventory> getShopList(){ return shopList; }
     public static Inventory get(String id){ return shopList.get(id); }
 
 
