@@ -3,10 +3,10 @@ package fr.rush.romain.rush;
 import fr.rush.romain.rush.managers.ChatManager;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
-import fr.rush.romain.rush.managers.ShopManager;
 import fr.rush.romain.rush.objects.Rush;
+import fr.rush.romain.rush.objects.Shop;
+import fr.rush.romain.rush.objects.ShopItem;
 import fr.rush.romain.rush.objects.Team;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -19,10 +19,12 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.meta.ArmorMeta;
 
 import static org.bukkit.Material.YELLOW_BED;
 
@@ -162,23 +164,33 @@ public class RushListener implements Listener {
         Entity entity = e.getRightClicked();
         Player player = e.getPlayer();
         Rush rush = Core.playersRush.getOrDefault(player, null);
-        Core.logger("Interact Event");
-
 
         if (rush == null || !(rush.isState(GState.PLAYING)) || !(entity.getScoreboardTags().contains("shop")))
             return;
 
         e.setCancelled(true);
         for(String shopID : FileManager.getConfig("shops").getStringList("shops.list")){
-            if(entity.getScoreboardTags().contains(shopID)) {
-                Core.logger("Opening " + shopID + " for " + player.getName());
-                player.openInventory(ShopManager.get(shopID));
-                break;
-            }
+            if(entity.getScoreboardTags().contains(shopID)) { Shop.openShop(player, shopID); break; }
         }
+    }
 
-        //POUR RECUPERER LE SHOP: TRANSFORMER LE MANAGER EN OBJET -> HASHMAP<DisplayName, Shop>
-        // POUR RECUPERER L'ITEM: HASHMAP PRIVATE DANS LE SHOP <Slot, ShopItem>
+    @EventHandler
+    public void InventoryClickEvent(InventoryClickEvent e){
+        String displayName = e.getView().getTitle();
+        Shop shop = Shop.getFromDisplayName(displayName);
+        Player player = (Player) e.getWhoClicked();
+        int slot = e.getSlot();
+
+        if(e.getCurrentItem().getItemMeta() instanceof ArmorMeta) e.setCancelled(true);
+
+        if(shop == null) { Core.logger("Shop is null"); return; }
+
+        e.setCancelled(true);
+        ShopItem shopItem = shop.getItem(slot);
+
+        if(shopItem == null) { Core.logger("shopItem is null"); return; }
+
+        shopItem.buy(player);
 
     }
 
@@ -244,7 +256,7 @@ public class RushListener implements Listener {
 
                 killer.sendMessage(FileManager.getConfigMessage("killer-message", victim, rush));
                 killer.playSound(killer.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 2, 1);
-                Bukkit.broadcastMessage(FileManager.getConfigMessage("killed-by-player", victim, rush).replaceAll("<killer>", killer.getName()));
+                rush.broadcast(FileManager.getConfigMessage("killed-by-player", victim, rush).replaceAll("<killer>", killer.getName()));
                 e.setDamage(0);
                 rush.killPlayer(victim);
                 rush.addKills(killer, 1);
@@ -255,12 +267,12 @@ public class RushListener implements Listener {
             Player player = (Player) e.getDamager();
             Rush rush = Core.playersRush.getOrDefault(player, null);
 
-            if (rush == null || !(rush.isState(GState.PLAYING)) || !(entity.getScoreboardTags().contains("rush")))
+            if (rush == null || !(rush.isState(GState.PLAYING)) || !(entity.getScoreboardTags().contains("shop")))
                 return;
 
             e.setCancelled(true);
             for (String shopID : FileManager.getConfig("shops").getStringList("shops")) {
-                if (entity.getScoreboardTags().contains(shopID)) player.openInventory(ShopManager.get(shopID));
+                if (entity.getScoreboardTags().contains(shopID)) { Shop.openShop(player, shopID); break; }
             }
         }
     }

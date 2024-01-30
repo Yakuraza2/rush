@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class InventoryManager {
 
-    public void removeItemFromInventory(Inventory inv, ItemStack item) {
+    public static void removeItemFromInventory(Inventory inv, ItemStack item) {
         if(inv.contains(item)) { // contains the exact item
             inv.remove(item); // remove first time it find this item
         } else { // doesn't contains this item

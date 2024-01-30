@@ -4,8 +4,8 @@ import fr.rush.romain.rush.commands.CommandsRush;
 import fr.rush.romain.rush.commands.CommandsShop;
 import fr.rush.romain.rush.commands.CommandsTeam;
 import fr.rush.romain.rush.managers.FileManager;
-import fr.rush.romain.rush.managers.ShopManager;
 import fr.rush.romain.rush.objects.Rush;
+import fr.rush.romain.rush.objects.Shop;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -43,7 +43,7 @@ public final class Core extends JavaPlugin {
 
         //créer tous les objets <parties de rush> via une procedure pour pouvoir aussi les reload
         loadGames();
-        ShopManager.loadShops();
+        loadShops();
 
     }
 
@@ -102,6 +102,13 @@ public final class Core extends JavaPlugin {
         Rush rush = new Rush(name);
         rushs.put(name, rush);
         addToWaiting(rush); //By default, a game is at Waiting State.
+    }
+
+    public void loadShops() {
+        Core.logger(1, "création des shops ");
+        for(String shopID : FileManager.getConfig("shops").getStringList("shops.list")){
+            new Shop(shopID);
+        }
     }
 
     public static void createGame(Player p, String rush_id) {

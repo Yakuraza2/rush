@@ -11,8 +11,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +30,10 @@ public class Rush {
     private final HashMap<Player, Team> playerTeam;
     private int aSlots;
     private GState aState;
-
     private final AutoStart autoStart;
     private final HashMap<Player, Integer> playerKills = new HashMap<>();
     private final HashMap<Player, Integer> playerDeaths = new HashMap<>();
+    private final List<Zone> aZoneList = new ArrayList<>();
 
     public Rush(String rush_id){
         aSlots = 0;
@@ -43,22 +45,32 @@ public class Rush {
             this.addTeam(rush_id, team);
             aSlots += aTeams.get(team).getSize();
         }
+
+        for(int i=0; i<=16; i++){
+            //IL FAUT VERIFIER QUE LES ZONES EXISTENT !!!
+
+            Zone zone = new Zone();
+            aZoneList.add(zone);
+        }
+
         aRush_id = rush_id;
 
-        World world = Bukkit.getWorld(FileManager.getConfig(rush_id).getString(rush_id + ".world"));
+        YamlConfiguration config = FileManager.getConfig(rush_id);
 
-        int x = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.x");
-        int y = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.y");
-        int z = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.z");
-        int yaw = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.yaw");
-        int pitch = FileManager.getConfig(rush_id).getInt(rush_id + ".lobby.pitch");
+        World world = Bukkit.getWorld(config.getString(rush_id + ".world"));
+
+        int x = config.getInt(rush_id + ".lobby.x");
+        int y = config.getInt(rush_id + ".lobby.y");
+        int z = config.getInt(rush_id + ".lobby.z");
+        int yaw = config.getInt(rush_id + ".lobby.yaw");
+        int pitch = config.getInt(rush_id + ".lobby.pitch");
         aLobby = new Location(world, x, y ,z, yaw, pitch);
 
-        int x2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.x");
-        int y2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.y");
-        int z2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.z");
-        int yaw2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.yaw");
-        int pitch2 = FileManager.getConfig(rush_id).getInt(rush_id + ".spectator-spawn.pitch");
+        int x2 = config.getInt(rush_id + ".spectator-spawn.x");
+        int y2 = config.getInt(rush_id + ".spectator-spawn.y");
+        int z2 = config.getInt(rush_id + ".spectator-spawn.z");
+        int yaw2 = config.getInt(rush_id + ".spectator-spawn.yaw");
+        int pitch2 = config.getInt(rush_id + ".spectator-spawn.pitch");
         aSpectSpawn = new Location(world, x2, y2, z2, yaw2, pitch2);
         autoStart = new AutoStart(this);
     }
@@ -88,6 +100,8 @@ public class Rush {
     public int getSlots() { return aSlots; }
     public String getID() { return aRush_id; }
     public AutoStart getAutoStart() { return autoStart; }
+
+    public List<Zone> getZones() { return this.aZoneList; }
 
 
 
