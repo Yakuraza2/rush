@@ -8,6 +8,7 @@ import fr.rush.romain.rush.managers.ScoreBoardManager;
 import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -42,10 +43,9 @@ public class PlayingTimer extends BukkitRunnable {
         if(timer%this.goldDelay == 0)    spawnGem(Material.GOLD_INGOT, "gold");
         if(timer%this.diamondDelay == 0) spawnGem(Material.DIAMOND, "diamond");
 
-        /*if(timer%FileManager.getConfig(rush.getID()).getInt("timers.player-zone-verif")==0){
-            zones Zones = new zones(main);
+        if(timer%FileManager.getConfig(rush.getID()).getInt("timers.player-zone-verif")==0){
             for(Player p : rush.getPlayers()){
-                if(Zones.isPlayerInZone(p)){
+                if(rush.isPlayerInZone(p)){
                     if(playerTimer.containsKey(p) && playerTimer.get(p) > 0){
                         playerTimer.put(p, 0);
                     }
@@ -65,7 +65,7 @@ public class PlayingTimer extends BukkitRunnable {
 
                 }
             }
-        }*/
+        }
         for(Player player : rush.getPlayers()){
             ScoreBoardManager.updateScoreboard(player, rush, timer);
         }

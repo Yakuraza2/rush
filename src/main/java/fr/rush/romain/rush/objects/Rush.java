@@ -1,7 +1,6 @@
 package fr.rush.romain.rush.objects;
 
 import fr.rush.romain.rush.managers.InventoryManager;
-import fr.rush.romain.rush.managers.ScoreBoardManager;
 import fr.rush.romain.rush.timers.AutoStart;
 import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.Core;
@@ -11,14 +10,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import static fr.rush.romain.rush.Core.logger;
 
 public class Rush {
     private final String aRush_id;
@@ -46,16 +46,17 @@ public class Rush {
             aSlots += aTeams.get(team).getSize();
         }
 
+        YamlConfiguration config = FileManager.getConfig(rush_id);
         for(int i=0; i<=16; i++){
-            //IL FAUT VERIFIER QUE LES ZONES EXISTENT !!!
+            logger("Searching for shops." + i);
+            ConfigurationSection section = config.getConfigurationSection("zones." + i);
 
-            Zone zone = new Zone();
+            if(section != null) break;
+            Zone zone = new Zone(rush_id, ""+i);
             aZoneList.add(zone);
         }
 
         aRush_id = rush_id;
-
-        YamlConfiguration config = FileManager.getConfig(rush_id);
 
         World world = Bukkit.getWorld(config.getString(rush_id + ".world"));
 
@@ -216,4 +217,11 @@ public class Rush {
     public int getDeaths(Player p) { return this.playerDeaths.getOrDefault(p, 0); }
 
     public void addKills(Player p, int kills) { playerKills.put(p, kills + this.getKills(p)); }
+
+    public boolean isPlayerInZone(Player player){
+        for(Zone zone : this.getZones()){
+            if(!zone.isPlayerIn(player)) return false;
+        }
+        return true;
+    }
 }

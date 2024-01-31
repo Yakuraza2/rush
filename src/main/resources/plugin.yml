@@ -12,3 +12,6 @@ commands:
   shop:
     description: Parametrer les shops
     permission: rush.admin
+  zone:
+    description: Parametrer les zones
+    permission: rush.admin

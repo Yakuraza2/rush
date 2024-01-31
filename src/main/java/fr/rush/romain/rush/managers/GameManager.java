@@ -17,7 +17,7 @@ public class GameManager {
         return Core.getWaitingList().get(0);
     }
 
-    public static boolean Join(Player p, Rush rush){
+    public static boolean join(Player p, Rush rush){
 
         if(rush == null) return false;
 
@@ -32,6 +32,7 @@ public class GameManager {
         }
         return true;
     }
+
 
     public static void BrownBedBreak(Player player, Rush rush, Team team) {
                 team.addHealBoost(1);

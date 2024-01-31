@@ -43,7 +43,7 @@ public class RushListener implements Listener {
 
         if (p.hasPermission("rush.admin")) {
             p.sendMessage("Vous avez rejoint le serveur en tant que Staff, /rush join pour rejoindre une partie");
-        } else GameManager.Join(p, GameManager.selectRush());
+        } else GameManager.join(p, GameManager.selectRush());
 
 
     }

@@ -3,6 +3,7 @@ package fr.rush.romain.rush;
 import fr.rush.romain.rush.commands.CommandsRush;
 import fr.rush.romain.rush.commands.CommandsShop;
 import fr.rush.romain.rush.commands.CommandsTeam;
+import fr.rush.romain.rush.commands.CommandsZone;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Shop;
@@ -19,7 +20,7 @@ import java.util.List;
 public final class Core extends JavaPlugin {
 
     private static final HashMap<String, Rush> rushs = new HashMap<>();
-    public static HashMap<Player, Rush> playersRush = new HashMap<Player, Rush>();
+    public static HashMap<Player, Rush> playersRush = new HashMap<>();
 
     public static List<Rush> waitingList = new ArrayList<>();
     private static File dataFolder;
@@ -40,6 +41,7 @@ public final class Core extends JavaPlugin {
         getCommand("rush").setExecutor(new CommandsRush(this));
         getCommand("team").setExecutor(new CommandsTeam(this));
         getCommand("shop").setExecutor(new CommandsShop(this));
+        getCommand("zone").setExecutor(new CommandsZone(this));
 
         //créer tous les objets <parties de rush> via une procedure pour pouvoir aussi les reload
         loadGames();

@@ -2,7 +2,7 @@ package fr.rush.romain.rush.commands;
 
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
-import fr.rush.romain.rush.managers.ShopManager;
+import fr.rush.romain.rush.objects.Shop;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -42,7 +42,7 @@ public class CommandsShop implements CommandExecutor {
         }
 
         String shopID = args[1];
-        if(ShopManager.getShopList().containsKey(shopID)) {
+        if(Shop.getList().containsKey(shopID)) {
             player.sendMessage("Le shop " + shopID + " existe déjà !");
             return true;
         }
@@ -81,7 +81,7 @@ public class CommandsShop implements CommandExecutor {
         Location loc = p.getLocation();
         String shopID = args[1];
 
-        if(!ShopManager.exists(shopID)) p.sendMessage(shopID + " n'existe pas !");
+        if(!Shop.getList().containsKey(shopID)) p.sendMessage(shopID + " n'existe pas !");
 
         Villager categoriesEntity = (Villager) world.spawnEntity(loc, EntityType.VILLAGER);
         categoriesEntity.setProfession(Villager.Profession.ARMORER);
