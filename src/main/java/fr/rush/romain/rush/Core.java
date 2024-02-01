@@ -8,6 +8,7 @@ import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.PacketsManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Shop;
+import fr.rush.romain.rush.timers.CoreTimer;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -26,14 +27,17 @@ public final class Core extends JavaPlugin {
     public static List<Rush> waitingList = new ArrayList<>();
     private static File dataFolder;
 
-    public static HashMap<String, String> serverList = new HashMap<>();
+    public static String serverName;
+
+    public static String lobby;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         dataFolder = getDataFolder();
 
-        this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new PacketsManager());
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, "romain:rush", new PacketsManager());
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "romain:rush");
         this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         FileManager.create("rush-list");
@@ -53,7 +57,13 @@ public final class Core extends JavaPlugin {
         loadGames();
         loadShops();
 
-        serverList.put("lobby", getConfig().getString("bungeecord.lobby"));
+        serverName = FileManager.getConfig().getString("bungeecord.server-name");
+
+        lobby = getConfig().getString("bungeecord.lobby");
+
+        CoreTimer timer = new CoreTimer();
+        timer.runTaskTimer(this, 0, 20);
+
     }
 
     @Override
@@ -134,6 +144,7 @@ public final class Core extends JavaPlugin {
         FileManager.set(config, "timers.iron", 15);
         FileManager.set(config, "timers.gold", 20);
         FileManager.set(config, "timers.diamond", 30);
+        FileManager.set(config, "timers.player-zone-verif", 5);
 
         FileManager.save(config, FileManager.get(rush_id));
     }

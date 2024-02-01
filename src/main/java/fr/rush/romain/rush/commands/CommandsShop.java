@@ -30,14 +30,14 @@ public class CommandsShop implements CommandExecutor {
             return false;
         }
         if(args[0].equalsIgnoreCase("create")) succeeded = commandCreateShop(player, args);
-        if(args[0].equalsIgnoreCase("spawn")) succeeded = commandSpawnShop(player, args);
+        else if(args[0].equalsIgnoreCase("spawn")) succeeded = commandSpawnShop(player, args);
 
         return succeeded;
     }
 
     private boolean commandCreateShop(Player player, String[] args) {
         if(args.length <= 3) {
-            player.sendMessage("Incorrect Usage ! /rush spawnshop <shop_id> <display name>");
+            player.sendMessage("Incorrect Usage ! /rush create t<shop_id> <display name>");
             return false;
         }
 
@@ -67,6 +67,8 @@ public class CommandsShop implements CommandExecutor {
         config.set("shops.list", shopsList);
         config.set("shops." + shopID + ".display-name", displayName);
         config.set("shops." + shopID + ".size", size);
+
+        player.sendMessage("&6Un nouveau shop " + displayName + " vient d'être créé !");
 
         FileManager.save(config, FileManager.get("shops"));
         return true;

@@ -1,36 +1,28 @@
 package fr.rush.romain.rush.timers;
 
 import fr.rush.romain.rush.Core;
-import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Team;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
 
-public class AutoStart extends BukkitRunnable {
+public class Starting{
 
-    private int timer;
+    private int timer = 0;
     private final Rush rush;
-    private final PlayingTimer playingTimer;
 
-    public AutoStart(Rush pRush){
+    public Starting(Rush pRush){
         rush = pRush;
-        timer = 0;
-        playingTimer = new PlayingTimer(rush);
     }
 
-    @Override
-    public void run() {
-        if(rush.getPlayers().isEmpty()) { cancel(); return;}
+    public void StartingMethod(){
+        if(rush.getPlayers().isEmpty()) return;
 
         if(rush.getPlayers().size() < rush.getSlots()){
-            if(timer > 5) timer=0;
+            if(timer > 15) timer=0;
             if(!rush.isState(GState.WAITING_FOR_PLAYERS)) rush.setState(GState.WAITING_FOR_PLAYERS);
             if(timer==0) rush.broadcast(FileManager.getConfigMessage("slots-not-full", rush));
             timer++;
@@ -82,12 +74,9 @@ public class AutoStart extends BukkitRunnable {
                 }
 
             }
-
-            playingTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
-
-            cancel();
         }
 
         timer--;
+
     }
 }

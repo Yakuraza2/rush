@@ -1,4 +1,13 @@
+fr\rush\romain\rush\timers\RushTimer.class
+fr\rush\romain\rush\timers\CoreTimer.class
+fr\rush\romain\rush\timers\Playing.class
+fr\rush\romain\rush\managers\PacketsManager.class
 fr\rush\romain\rush\commands\CommandsShop.class
-fr\rush\romain\rush\commands\CommandsRush.class
-fr\rush\romain\rush\timers\FinishTimer.class
+fr\rush\romain\rush\objects\Shop.class
 fr\rush\romain\rush\managers\ScoreBoardManager.class
+fr\rush\romain\rush\timers\Starting.class
+fr\rush\romain\rush\timers\Finish.class
+fr\rush\romain\rush\commands\CommandsRush.class
+fr\rush\romain\rush\commands\CommandsZone.class
+fr\rush\romain\rush\objects\Zone.class
+fr\rush\romain\rush\timers\GState.class

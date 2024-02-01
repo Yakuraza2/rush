@@ -10,6 +10,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
+import static fr.rush.romain.rush.Core.logger;
+
 public class InventoryManager {
 
     public static void removeItemFromInventory(Inventory inv, ItemStack item) {
@@ -44,10 +46,10 @@ public class InventoryManager {
 
     public static void giveSpawnKit(Player p){
         Rush rush = Core.playersRush.getOrDefault(p, null);
-        if(rush==null) { Core.logger(1, p.getName() + " n'est dans aucun rush !"); return; }
+        if(rush==null) { logger(1, p.getName() + " n'est dans aucun rush !"); return; }
 
         Team team = rush.getPlayerTeam(p);
-        if(team==null) { Core.logger(1, p.getName() + " n'est dans aucune équipe dans " + rush.getID()); return; }
+        if(team==null) { logger(1, p.getName() + " n'est dans aucune équipe dans " + rush.getID()); return; }
 
         giveColoredArmor(p, team.getColor());
 

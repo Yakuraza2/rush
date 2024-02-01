@@ -3,10 +3,12 @@ package fr.rush.romain.rush;
 import fr.rush.romain.rush.managers.ChatManager;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
+import fr.rush.romain.rush.managers.PacketsManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Shop;
 import fr.rush.romain.rush.objects.ShopItem;
 import fr.rush.romain.rush.objects.Team;
+import fr.rush.romain.rush.timers.GState;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -25,8 +27,8 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import static fr.rush.romain.rush.managers.PacketsManager.connectToServer;
 import static org.bukkit.Material.YELLOW_BED;
 
 public class RushListener implements Listener {
@@ -40,11 +42,22 @@ public class RushListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         e.setJoinMessage("");
-        Player p = e.getPlayer();
+        Player player = e.getPlayer();
 
-        if (p.hasPermission("rush.admin")) {
-            p.sendMessage("Vous avez rejoint le serveur en tant que Staff, /rush join pour rejoindre une partie");
-        } else GameManager.join(p, GameManager.selectRush());
+        if (player.hasPermission("rush.admin")) {
+            player.sendMessage("Vous avez rejoint le serveur en tant que Staff, /rush join pour rejoindre une partie");
+            return;
+        }
+        if(PacketsManager.comingPlayer.containsKey(player)){
+            GameManager.join(player, PacketsManager.comingPlayer.get(player));
+        } else {
+            Rush rush = GameManager.selectRush();
+            if(rush == null) {
+                connectToServer(player, "lobby");
+                return;
+            }
+            GameManager.join(player, rush);
+        }
 
 
     }
@@ -60,6 +73,9 @@ public class RushListener implements Listener {
     @EventHandler
     public void onBreak(BlockBreakEvent e){
         Player player = e.getPlayer();
+
+        if(!Core.playersRush.containsKey(player)) return;
+
         Rush rush = Core.playersRush.get(player);
         Team playerTeam = rush.getPlayerTeam(player);
 
@@ -120,7 +136,7 @@ public class RushListener implements Listener {
     }
 
     public boolean isBed(Material block) {
-        return block == YELLOW_BED || block == Material.BROWN_BED || block == Material.PURPLE_BED;
+        return block.name().toLowerCase().contains("bed");
     }
 
     @EventHandler
@@ -182,6 +198,8 @@ public class RushListener implements Listener {
         Shop shop = Shop.getFromDisplayName(displayName);
         Player player = (Player) e.getWhoClicked();
         int slot = e.getSlot();
+
+        if(e.getCurrentItem() == null) return;
 
         if(e.getCurrentItem().getItemMeta() instanceof ArmorMeta) e.setCancelled(true);
 

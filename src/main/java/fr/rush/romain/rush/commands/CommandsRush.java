@@ -3,16 +3,11 @@ package fr.rush.romain.rush.commands;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
-import fr.rush.romain.rush.managers.ShopManager;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -30,10 +25,10 @@ public class CommandsRush implements CommandExecutor {
             return false;
         }
         if(args[0].equalsIgnoreCase("list")) succeeded = commandList(p, args);
-        if(args[0].equalsIgnoreCase("join")) succeeded = GameManager.Join(p, GameManager.selectRush());
-        if(args[0].equalsIgnoreCase("reload")) succeeded = Core.loadGames();
-        if(args[0].equalsIgnoreCase("create")) succeeded = commandCreate(p, args);
-        if(args[0].equalsIgnoreCase("set")) succeeded = commandSet(p, args);
+        else if(args[0].equalsIgnoreCase("join")) succeeded = GameManager.join(p, GameManager.selectRush());
+        else if(args[0].equalsIgnoreCase("reload")) succeeded = Core.loadGames();
+        else if(args[0].equalsIgnoreCase("create")) succeeded = commandCreate(p, args);
+        else if(args[0].equalsIgnoreCase("set")) succeeded = commandSet(p, args);
 
 
         return succeeded;

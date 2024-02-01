@@ -18,7 +18,7 @@ public class Team {
     private final Location aSpawn;
     private int aSize;
     private final String team_id;
-    private final Material aBedMaterial;
+    private Material aBedMaterial;
 
     private String DisplayName;
     private final String rushID;
@@ -146,4 +146,6 @@ public class Team {
         this.bedStatus = true;
         this.eliminated = false;
     }
+
+    public void setBedMaterial(Material bed) { this.aBedMaterial = bed; }
 }

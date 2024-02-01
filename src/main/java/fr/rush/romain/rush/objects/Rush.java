@@ -1,8 +1,8 @@
 package fr.rush.romain.rush.objects;
 
 import fr.rush.romain.rush.managers.InventoryManager;
-import fr.rush.romain.rush.timers.AutoStart;
-import fr.rush.romain.rush.GState;
+import fr.rush.romain.rush.timers.RushTimer;
+import fr.rush.romain.rush.timers.GState;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import static fr.rush.romain.rush.Core.logger;
@@ -30,7 +31,7 @@ public class Rush {
     private final HashMap<Player, Team> playerTeam;
     private int aSlots;
     private GState aState;
-    private final AutoStart autoStart;
+    private final RushTimer autoStart;
     private final HashMap<Player, Integer> playerKills = new HashMap<>();
     private final HashMap<Player, Integer> playerDeaths = new HashMap<>();
     private final List<Zone> aZoneList = new ArrayList<>();
@@ -48,10 +49,10 @@ public class Rush {
 
         YamlConfiguration config = FileManager.getConfig(rush_id);
         for(int i=0; i<=16; i++){
-            logger("Searching for shops." + i);
+            logger("Searching for zones." + i);
             ConfigurationSection section = config.getConfigurationSection("zones." + i);
 
-            if(section != null) break;
+            if(section == null) break;
             Zone zone = new Zone(rush_id, ""+i);
             aZoneList.add(zone);
         }
@@ -73,7 +74,9 @@ public class Rush {
         int yaw2 = config.getInt(rush_id + ".spectator-spawn.yaw");
         int pitch2 = config.getInt(rush_id + ".spectator-spawn.pitch");
         aSpectSpawn = new Location(world, x2, y2, z2, yaw2, pitch2);
-        autoStart = new AutoStart(this);
+        autoStart = new RushTimer(this);
+
+        autoStart.runTaskTimer(Core.getPlugin(Core.class), 0, 20);
     }
 
     public boolean isState(GState state) { return this.aState == state; }
@@ -100,7 +103,7 @@ public class Rush {
 
     public int getSlots() { return aSlots; }
     public String getID() { return aRush_id; }
-    public AutoStart getAutoStart() { return autoStart; }
+    public RushTimer getAutoStart() { return autoStart; }
 
     public List<Zone> getZones() { return this.aZoneList; }
 
@@ -112,7 +115,10 @@ public class Rush {
         this.playerKills.clear();
         this.playerTeam.clear();
 
-        for(Player player : this.getPlayers()) GameManager.resetPlayer(player);
+        for (Iterator<Player> it = this.getPlayers().iterator(); it.hasNext(); ) {
+            Player player = it.next();
+            GameManager.resetPlayer(player);
+        }
         for(Team team : this.aTeams.values()) team.reset();
 
         this.setState(GState.WAITING_FOR_PLAYERS);
@@ -188,7 +194,7 @@ public class Rush {
         checkWin();
     }
 
-    private void checkWin() {
+    public void checkWin() {
         int alives = 0;
         Team winners = null;
 

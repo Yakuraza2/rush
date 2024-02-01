@@ -5,11 +5,14 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import fr.rush.romain.rush.Core;
+import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
-import static fr.rush.romain.rush.Core.logger;
+import java.util.HashMap;
+
+import static fr.rush.romain.rush.Core.*;
 
 public class PacketsManager implements PluginMessageListener {
 
@@ -18,39 +21,24 @@ Si oui: le stocker et le joueur est connecté au serveur et join(player rush)
 Si non: Le plugin sur le lobby gèrera la Players Waiting List et a chaque game finie, un message est send au lobby pour lui faire connecter les joueurs
  */
 
+    public static HashMap<Player, Rush> comingPlayer = new HashMap<>();
+
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-        if (!channel.equals("BungeeCord")) {
-            return;
-        }
-        ByteArrayDataInput in = ByteStreams.newDataInput(message);
-        String subchannel = in.readUTF();
-        if (subchannel.equals("CanJoin")) {
-            String rushID = GameManager.selectRushID();
-            if(rushID==null){
-                logger("Player can't join !");
-                sendPluginMessage("Rush", "No");
-            }else{
-                logger("Player will join " + rushID);
-                sendPluginMessage("Rush", rushID);
-            }
-            return;
-        }
-
-        /*if(subchannel.equals("isJoining")){
-            String rushID = in.readUTF();
-        }*/
+        logger("Packets received");
     }
 
-    public void sendPluginMessage(String subChannel, String arg, Player player){
+    public static void sendPluginMessage(String subChannel, String arg, Player player){
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(subChannel);
+        out.writeUTF(serverName);
         out.writeUTF(arg);
 
-        player.sendPluginMessage(Core.getPlugin(Core.class), "BungeeCord", out.toByteArray());
+        player.sendPluginMessage(Core.getPlugin(Core.class), "romain:rush", out.toByteArray());
     }
 
-    public void sendPluginMessage(String subChannel, String arg){
+    public static void sendPluginMessage(String subChannel, String arg){
+        if(Bukkit.getOnlinePlayers().isEmpty()) return;
         sendPluginMessage(subChannel, arg, Iterables.getFirst(Bukkit.getOnlinePlayers(), null));
     }
 
@@ -60,9 +48,17 @@ Si non: Le plugin sur le lobby gèrera la Players Waiting List et a chaque game 
 
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF("Connect");
-        out.writeUTF(Core.serverList.get(serverName));
+        out.writeUTF(serverName);
 
         p.sendPluginMessage(Core.getPlugin(Core.class), "BungeeCord", out.toByteArray());
+    }
+
+    public static void sendSlotsToProxy(){
+        int slots = 0;
+        for(Rush rush : Core.waitingList){
+            slots += rush.getSlots() - rush.getPlayers().size();
+        }
+        sendPluginMessage("Slots", "" + slots);
     }
 
 }

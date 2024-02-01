@@ -1,7 +1,7 @@
 package fr.rush.romain.rush.managers;
 
 import fr.rush.romain.rush.Core;
-import fr.rush.romain.rush.GState;
+import fr.rush.romain.rush.timers.GState;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Team;
 import org.bukkit.entity.Player;
@@ -30,8 +30,6 @@ public class GameManager {
 
         if(rush == null) return false;
 
-        if(rush.getPlayers().isEmpty()) rush.getAutoStart().runTaskTimer(Core.getPlugin(Core.class), 0, 20);
-
         rush.addPlayer(p);
         Core.playersRush.put(p, rush);
         rush.spawnPlayer(p);
@@ -55,8 +53,10 @@ public class GameManager {
         if (rush.isState(GState.PLAYING) && rush.getAlivePlayers().contains(player)) {
             rush.eliminatePlayer(player, rush.getPlayerTeam(player));
             rush.broadcast(player.getName() + " a quitté la partie");
+            rush.checkWin();
         }
         ScoreBoardManager.clearScoreBoard(player);
+        rush.getPlayers().remove(player);
         Core.playersRush.remove(player);
     }
 

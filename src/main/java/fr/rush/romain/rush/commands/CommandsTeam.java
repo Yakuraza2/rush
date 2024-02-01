@@ -4,6 +4,7 @@ import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Team;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,10 +23,13 @@ public class CommandsTeam implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
         boolean succeeded = false;
         Player player = (Player) sender;
-        if (args.length < 1) player.sendMessage("Invalid Command !");
+        if (args.length < 1) {
+            player.sendMessage("Invalid Command !");
+            return false;
+        }
 
         if (args[0].equalsIgnoreCase("add")) succeeded = commandAdd(player, args);
-        if(args[1].equalsIgnoreCase("set")) succeeded = commandSet(player, args);
+        else if(args[0].equalsIgnoreCase("set")) succeeded = commandSet(player, args);
 
         return succeeded;
     }
@@ -33,11 +37,11 @@ public class CommandsTeam implements CommandExecutor {
     private boolean commandSet(Player player, String[] args) {
 
         if (args.length < 4) {
-            player.sendMessage("Incorrect Usage: /team [rush_id] set [team] [setting] [value]");
+            player.sendMessage("Incorrect Usage: /team set [rush_id] [team] [setting] [value]");
             return false;
         }
 
-        String rush_id = args[0];
+        String rush_id = args[1];
         String attribut = args[3];
         String team_id = args[2];
 
@@ -75,6 +79,9 @@ public class CommandsTeam implements CommandExecutor {
                 FileManager.setLocation(config, "teams." + team_id + ".item-spawner", player.getLocation());
                 currentTeam.setItemsSpawners(player.getLocation());
                 break;
+            case "bed":
+                FileManager.set(config, "teams." + team_id + ".bed-material", value.toUpperCase());
+                currentTeam.setBedMaterial(Material.matchMaterial(value));
             default:
                 player.sendMessage("Given setting doesn't exists !");
                 return false;

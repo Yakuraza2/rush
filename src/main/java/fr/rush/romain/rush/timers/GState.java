@@ -1,4 +1,4 @@
-package fr.rush.romain.rush;
+package fr.rush.romain.rush.timers;
 
 public enum GState {
 

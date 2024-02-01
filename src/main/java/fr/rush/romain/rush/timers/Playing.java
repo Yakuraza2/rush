@@ -1,7 +1,5 @@
 package fr.rush.romain.rush.timers;
 
-import fr.rush.romain.rush.Core;
-import fr.rush.romain.rush.GState;
 import fr.rush.romain.rush.managers.ItemsManager;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.ScoreBoardManager;
@@ -10,11 +8,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 
-public class PlayingTimer extends BukkitRunnable {
+public class Playing {
 
     private final Rush rush;
     private int timer = 1;
@@ -22,22 +19,16 @@ public class PlayingTimer extends BukkitRunnable {
     private final int ironDelay;
     private final int goldDelay;
     private final int diamondDelay;
-    private final FinishTimer finishTimer;
     HashMap<Player, Integer> playerTimer = new HashMap<>();
 
-    public PlayingTimer(Rush pRush) {
+    public Playing(Rush pRush){
         this.rush = pRush;
         this.bronzeDelay = FileManager.getConfig(rush.getID()).getInt("timers.bronze");
         this.ironDelay = FileManager.getConfig(rush.getID()).getInt("timers.iron");
         this.goldDelay = FileManager.getConfig(rush.getID()).getInt("timers.gold");
         this.diamondDelay = FileManager.getConfig(rush.getID()).getInt("timers.diamond");
-        this.finishTimer = new FinishTimer(pRush);
     }
-
-    @Override
-    public void run() {
-        if(!rush.isState(GState.PLAYING)) cancel();
-
+    public void PlayingMethod() {
         if(timer%this.bronzeDelay == 0)  spawnGem(Material.COPPER_INGOT, "bronze");
         if(timer%this.ironDelay == 0)    spawnGem(Material.IRON_INGOT, "iron");
         if(timer%this.goldDelay == 0)    spawnGem(Material.GOLD_INGOT, "gold");
@@ -72,10 +63,7 @@ public class PlayingTimer extends BukkitRunnable {
         timer++;
 
         if(rush.isState(GState.FINISH)){
-            finishTimer.runTaskTimer(Core.getPlugin(Core.class),0,20);
-
             this.timer = 1;
-            cancel();
         }
     }
 
