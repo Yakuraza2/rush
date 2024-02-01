@@ -8,6 +8,8 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import static fr.rush.romain.rush.managers.PacketsManager.connectToServer;
+
 public class FinishTimer extends BukkitRunnable {
 
     private int timer;
@@ -44,6 +46,11 @@ public class FinishTimer extends BukkitRunnable {
         if(this.timer <=0){
             rush.reset();
             this.timer = this.staticTimer;
+            for(Player player : rush.getPlayers()){
+                player.sendMessage("§6Retour sur le serveur lobby...");
+                connectToServer(player, "lobby");
+            }
+
             cancel();
         }
         this.timer--;

@@ -5,6 +5,7 @@ import fr.rush.romain.rush.commands.CommandsShop;
 import fr.rush.romain.rush.commands.CommandsTeam;
 import fr.rush.romain.rush.commands.CommandsZone;
 import fr.rush.romain.rush.managers.FileManager;
+import fr.rush.romain.rush.managers.PacketsManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Shop;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -25,10 +26,15 @@ public final class Core extends JavaPlugin {
     public static List<Rush> waitingList = new ArrayList<>();
     private static File dataFolder;
 
+    public static HashMap<String, String> serverList = new HashMap<>();
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
         dataFolder = getDataFolder();
+
+        this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", new PacketsManager());
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         FileManager.create("rush-list");
         FileManager.create("shops");
@@ -47,11 +53,13 @@ public final class Core extends JavaPlugin {
         loadGames();
         loadShops();
 
+        serverList.put("lobby", getConfig().getString("bungeecord.lobby"));
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        this.getServer().getMessenger().unregisterOutgoingPluginChannel(this);
+        this.getServer().getMessenger().unregisterIncomingPluginChannel(this);
     }
 
     public static File getPluginDataFolder() { return dataFolder; }

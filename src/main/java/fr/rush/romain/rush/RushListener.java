@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import static org.bukkit.Material.YELLOW_BED;
 
@@ -47,6 +48,7 @@ public class RushListener implements Listener {
 
 
     }
+
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {

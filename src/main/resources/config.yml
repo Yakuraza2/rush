@@ -27,6 +27,9 @@ messages:
   team-chat: "§bTEAM: §f<player> §b: §f"
   spectator-chat: "§7SPECTATOR <player> : §7§i"
 
+bungeecord:
+  lobby-server-name: "lobby"
+
   admin:
     slots: "Nouveau nombre de slots défini à <slots> !"
     lobby: ""

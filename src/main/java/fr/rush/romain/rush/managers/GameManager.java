@@ -17,6 +17,15 @@ public class GameManager {
         return Core.getWaitingList().get(0);
     }
 
+    public static String selectRushID(){
+        if(Core.getWaitingList().isEmpty()){
+            Core.logger(1, "Aucun rush ne semble disponible :'(");
+            return null;
+        }
+
+        return Core.getWaitingList().get(0).getID();
+    }
+
     public static boolean join(Player p, Rush rush){
 
         if(rush == null) return false;
