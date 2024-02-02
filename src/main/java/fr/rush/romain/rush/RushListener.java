@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.ArmorMeta;
 
+import static fr.rush.romain.rush.Core.allowedBlocks;
 import static fr.rush.romain.rush.managers.PacketsManager.connectToServer;
 import static org.bukkit.Material.YELLOW_BED;
 
@@ -88,21 +89,29 @@ public class RushListener implements Listener {
             return;
         }
 
-        if(!brokenBlockMaterial.name().toLowerCase().contains("bed")) return;
-
-        if(brokenBlockMaterial.equals(Material.BROWN_BED)) GameManager.BrownBedBreak(player, rush, playerTeam);
-
-        //else, go found the team's destroyed bed
-        for(Team team : rush.getTeams().values()){
-            if(brokenBlockMaterial.equals(team.getBedMaterial())){
-                if(team.equals(playerTeam)){
-                    e.setCancelled(true);
-                    player.sendMessage(FileManager.getConfigMessage("ally-bed-destroy", rush));
-                    return;
-                }
-                team.breakBed(player, rush);
+        if(brokenBlockMaterial.name().toLowerCase().contains("bed")) {
+            if(brokenBlockMaterial.equals(Material.BROWN_BED)) {
+                GameManager.BrownBedBreak(player, rush, playerTeam);
                 return;
             }
+
+            //else, go found the team's destroyed bed
+            for(Team team : rush.getTeams().values()){
+                if(brokenBlockMaterial.equals(team.getBedMaterial())){
+                    if(team.equals(playerTeam)){
+                        e.setCancelled(true);
+                        player.sendMessage(FileManager.getConfigMessage("ally-bed-destroy", rush));
+                        return;
+                    }
+                    team.breakBed(player, rush);
+                    return;
+                }
+            }
+        }
+
+        if(!allowedBlocks.contains(brokenBlockMaterial)){
+            e.setCancelled(true);
+            return;
         }
 
     }

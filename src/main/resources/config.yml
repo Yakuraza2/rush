@@ -35,6 +35,11 @@ bungeecord:
   errors:
     buy: "§cUne erreur est survenue lors du retrait de vos <item>s, veulliez contacter un Staff !"
 
+#Les lits ne sont pas à mettre dans la list, tous les autres blocks ne pourront être posés/cassés
+place-break-list:
+  - SANDSTONE
+  - WOOD
+  - TNT
 
 shops:
     display-names:

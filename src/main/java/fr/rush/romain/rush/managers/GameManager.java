@@ -6,6 +6,9 @@ import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Team;
 import org.bukkit.entity.Player;
 
+import static fr.rush.romain.rush.Core.lobby;
+import static fr.rush.romain.rush.managers.PacketsManager.connectToServer;
+
 public class GameManager {
 
     public static Rush selectRush(){
@@ -28,7 +31,11 @@ public class GameManager {
 
     public static boolean join(Player p, Rush rush){
 
-        if(rush == null) return false;
+        if(rush == null) {
+            p.sendMessage("§4Erreur: §cAucune game de libre, retour au lobby.");
+            connectToServer(p, lobby);
+            return false;
+        }
 
         rush.addPlayer(p);
         Core.playersRush.put(p, rush);

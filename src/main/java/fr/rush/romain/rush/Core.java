@@ -9,6 +9,7 @@ import fr.rush.romain.rush.managers.PacketsManager;
 import fr.rush.romain.rush.objects.Rush;
 import fr.rush.romain.rush.objects.Shop;
 import fr.rush.romain.rush.timers.CoreTimer;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -30,6 +31,8 @@ public final class Core extends JavaPlugin {
     public static String serverName;
 
     public static String lobby;
+
+    public static List<Material> allowedBlocks = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -60,6 +63,10 @@ public final class Core extends JavaPlugin {
         serverName = FileManager.getConfig().getString("bungeecord.server-name");
 
         lobby = getConfig().getString("bungeecord.lobby");
+
+        for(String material : FileManager.getConfig().getStringList("place-break-list")){
+            allowedBlocks.add(Material.matchMaterial(material));
+        }
 
         CoreTimer timer = new CoreTimer();
         timer.runTaskTimer(this, 0, 20);
