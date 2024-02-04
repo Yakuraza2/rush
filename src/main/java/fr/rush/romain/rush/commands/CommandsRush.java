@@ -3,6 +3,7 @@ package fr.rush.romain.rush.commands;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
+import fr.rush.romain.rush.objects.Rush;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +23,7 @@ public class CommandsRush implements CommandExecutor {
 
         if(args.length == 0) {
             player.sendMessage("§cUsage: /rush <command> <rush_id> <parameter>");
+            player.sendMessage("§cCommands: join, list, reload, create, set, stop");
             return false;
         }
         if(args[0].equalsIgnoreCase("list")) succeeded = commandList(p, args);
@@ -29,9 +31,36 @@ public class CommandsRush implements CommandExecutor {
         else if(args[0].equalsIgnoreCase("reload")) succeeded = Core.loadGames();
         else if(args[0].equalsIgnoreCase("create")) succeeded = commandCreate(p, args);
         else if(args[0].equalsIgnoreCase("set")) succeeded = commandSet(p, args);
+        else if(args[0].equalsIgnoreCase("stop")) succeeded = commandStop(p, args);
 
 
         return succeeded;
+    }
+
+    private boolean commandStop(Player p, String[] args) {
+        if(args.length < 2) {
+            p.sendMessage("§cUsage: /rush stop <rush_id> (<reason>)");
+            return false;
+        }
+
+        String rushid = args[1];
+
+        if(!Core.getRushsList().containsKey(rushid)){
+            p.sendMessage(rushid + " n'existe pas !");
+            return true;
+        }
+
+        Rush rush = Core.getRushsList().get(rushid);
+
+        StringBuilder str = new StringBuilder();
+        if(args.length >= 3){
+            for(int i=2; i< args.length; i++){
+                str.append(args[i]).append(" ");
+            }
+        }
+
+        rush.forceStop(str.toString());
+        return true;
     }
 
     private boolean commandSet(Player p, String[] args) {

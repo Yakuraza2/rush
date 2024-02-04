@@ -65,10 +65,16 @@ public class Team {
     }
 
     public void addPlayer(final Player p) {
+
         this.aPlayer.add(p);
+        p.setPlayerListName(this.DisplayName + "§e " + p.getDisplayName() );
+        p.setDisplayName(this.DisplayName + " " + p.getName() + ChatColor.RESET);
     }
     public void removePlayer(final Player p) {
+
         this.aPlayer.remove(p);
+        p.setPlayerListName(p.getName() );
+        p.setDisplayName(p.getName());
     }
     public List<Player> getPlayers() {
         return aPlayer;
