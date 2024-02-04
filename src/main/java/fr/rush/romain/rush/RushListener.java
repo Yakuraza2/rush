@@ -4,18 +4,14 @@ import fr.rush.romain.rush.managers.ChatManager;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
 import fr.rush.romain.rush.managers.PacketsManager;
-import fr.rush.romain.rush.objects.Rush;
-import fr.rush.romain.rush.objects.Shop;
-import fr.rush.romain.rush.objects.ShopItem;
-import fr.rush.romain.rush.objects.Team;
+import fr.rush.romain.rush.objects.*;
 import fr.rush.romain.rush.timers.GState;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.block.Bed;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -30,13 +26,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.ArmorMeta;
 
-import static fr.rush.romain.rush.Actions.DESTROY;
 import static fr.rush.romain.rush.Actions.PLACE;
 import static fr.rush.romain.rush.Core.allowedBlocks;
 import static fr.rush.romain.rush.Core.playersRush;
 import static fr.rush.romain.rush.managers.PacketsManager.connectToServer;
-import static org.bukkit.Material.AIR;
-import static org.bukkit.Material.YELLOW_BED;
 
 public class RushListener implements Listener {
 
@@ -77,7 +70,7 @@ public class RushListener implements Listener {
         GameManager.resetPlayer(p);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBreak(BlockBreakEvent e){
         Player player = e.getPlayer();
 
@@ -97,7 +90,8 @@ public class RushListener implements Listener {
             return;
         }
 
-        if(brokenBlockMaterial.name().toLowerCase().contains("bed")) {
+        if(isBed(brokenBlockMaterial)) {
+            e.setCancelled(true);
             if(brokenBlockMaterial.equals(Material.BROWN_BED)) {
                 GameManager.BrownBedBreak(player, rush, playerTeam);
                 bed = true;
@@ -106,16 +100,17 @@ public class RushListener implements Listener {
                 for(Team team : rush.getTeams().values()){
                     if(brokenBlockMaterial.equals(team.getBedMaterial())) {
                         if (team.equals(playerTeam)) {
-                            e.setCancelled(true);
                             player.sendMessage(FileManager.getConfigMessage("ally-bed-destroy", rush));
                             return;
                         }
                         team.breakBed(player, rush);
                         bed = true;
-                        break;
                     }
                 }
             }
+            BedBlock bedBlock = new BedBlock(block);
+            bedBlock.remove();
+            rush.addBedDestroy(bedBlock);
         }
 
         if(!allowedBlocks.contains(brokenBlockMaterial) && !bed){
@@ -123,7 +118,7 @@ public class RushListener implements Listener {
             return;
         }
 
-        playersRush.get(player).addBlockChange(DESTROY, block);
+        playersRush.get(player).addBlockDestroy(block.getLocation(), brokenBlockMaterial);
 
 
     }

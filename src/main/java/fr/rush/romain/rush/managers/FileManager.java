@@ -89,6 +89,7 @@ public class FileManager {
 
     }
 
+    public static String getConfigMessage(String path){ return getConfigMessage(path, null, true, null, 0); }
     public static String getConfigMessage(String path, Player player, Rush rush){ return getConfigMessage(path, player, true, rush, 0); }
     public static String getConfigMessage(String path, Player player, Rush rush, boolean prefix){ return getConfigMessage(path, player, prefix, rush, 0); }
     public static String getConfigMessage(String path, Rush rush){ return getConfigMessage(path, null, true, rush, 0); }

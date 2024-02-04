@@ -4,9 +4,11 @@ server-name: Rush1
 messages:
   prefix: "§6[§eRush§6]"
   join-message: "§e<player> vient de rejoindre le §6Rush §e! <<onlines>/<slots>>"
+  quit-message: "§e<player> a quitté la partie."
   countdown: "§eLe rush commence dans §6<time> §esecondes !"
   killed-by-player: "§6<player> §ea été tué par §6<killer> !"
   death: "§6<player> §ea cassé sa pipe !"
+  eliminate: "§6<player> §ea été éliminé !"
   spectator-join: "§eLe jeu a déjà démarré !"
   starting: "§eLe jeu démarre !"
   bed-destroy: "§eLe lit §6<bed> §ea été détruit par §6<player> §e!"
@@ -21,13 +23,14 @@ messages:
   no-pvp: "§cVous ne pouvez pas taper ce joueur maintenant !"
   no-break: "§cVous ne pouvez pas casser de block maintenant !"
   item-buy: "§eVous venez d'acheter : <item>"
-
-  yellow-team: "§eJAUNE"
-  purple-team: "§5VIOLETTE"
+  out-zone: "§cRevenez dans la zone de jeu !"
 
   global-chat: "§bGLOGAL: §f<team> §f| <player> §f: §7"
   team-chat: "§bTEAM: §f<player> §b: §f"
   spectator-chat: "§7SPECTATOR <player> : §7§i"
+
+  force-stop: "§6Le rush a été arrêté de force: "
+  no-game: "§4Erreur: §cAucune game de libre, retour au lobby."
 
 bungeecord:
   lobby-server-name: "lobby"

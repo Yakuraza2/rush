@@ -8,11 +8,7 @@ import fr.rush.romain.rush.managers.InventoryManager;
 import fr.rush.romain.rush.timers.GState;
 import fr.rush.romain.rush.timers.RushTimer;
 import org.bukkit.*;
-import org.bukkit.block.Bed;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.type.Bed.Part;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -23,7 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import static fr.rush.romain.rush.Core.logger;
-import static fr.rush.romain.rush.RushListener.isBed;
+import static fr.rush.romain.rush.managers.FileManager.getConfigMessage;
+import static fr.rush.romain.rush.managers.FileManager.prefix;
 
 public class Rush {
     private final String aRush_id;
@@ -39,8 +36,10 @@ public class Rush {
     private final HashMap<Player, Integer> playerKills = new HashMap<>();
     private final HashMap<Player, Integer> playerDeaths = new HashMap<>();
     private final List<Zone> aZoneList = new ArrayList<>();
-    private HashMap<Block, Actions> blockChange = new HashMap<>();
+    private final HashMap<Block, Actions> blockChange = new HashMap<>();
     // Ancien block ; Nouveau block
+    private final HashMap<Location, Material> blockDestroy = new HashMap<>();
+    private final List<BedBlock> bedDestroy = new ArrayList<>();
 
     private final World world;
 
@@ -118,7 +117,7 @@ public class Rush {
 
 
     public void reset(){
-        Core.logger(1, "RESET du rush " + this.aRush_id + "...");
+        Core.logger(2, "RESET du rush " + this.aRush_id + "...");
         this.playerDeaths.clear();
         this.playerKills.clear();
         this.playerTeam.clear();
@@ -156,21 +155,14 @@ public class Rush {
 
         if(this.isState(GState.PLAYING)){
             Team.applyHealBoost(player, this);
-
             getPlayerTeam(player).spawnPlayer(player);
-
             InventoryManager.giveSpawnKit(player);
-        } else if(this.isState(GState.FINISH)){
-            spawnSpectator(player);
-        }else{
-            player.teleport(this.aLobby);
-            Core.logger("PLAYER TELEPORTED LOBBY");
         }
-
+        else if(this.isState(GState.FINISH))spawnSpectator(player);
+        else player.teleport(this.aLobby);
     }
 
     public void spawnSpectator(Player player){
-        Core.logger(player.getName() + "a spawn en spectator");
         player.setGameMode(GameMode.SPECTATOR);
 
         //tablist tabList = new tablist(main);
@@ -198,7 +190,7 @@ public class Rush {
             playerTeam.eliminate();
         }
 
-        this.broadcast(player.getName() + " a été éliminé !");
+        this.broadcast(getConfigMessage("eliminate", player, this));
 
         spawnSpectator(player);
 
@@ -219,14 +211,17 @@ public class Rush {
 
         //S'il reste moins de 2 équipes en vie alors on a notre équipe 'winners' gagnante !
         if(winners == null){
-            Core.logger("Il semblerait n'y avoir aucun gagnant...");
-            this.broadcast(FileManager.getConfigMessage("no-winner", this));
+            this.broadcast(getConfigMessage("no-winner", this));
             return;
         }
 
-        this.broadcast(FileManager.getConfigMessage("winning-broadcast", this).replaceAll("<team>", winners.getDisplayName()));
+        this.broadcast(getConfigMessage("winning-broadcast", this).replaceAll("<team>", winners.getDisplayName()));
         this.setState(GState.FINISH);
 
+    }
+
+    public void forceStop(String reason){
+        this.broadcast(prefix() + " " + getConfigMessage("force-stop", this) + reason);
     }
 
     public int getKills(Player p) { return this.playerKills.getOrDefault(p, 0); }
@@ -244,37 +239,31 @@ public class Rush {
 
     public void regenMap(){
         for(Block block : this.blockChange.keySet()){
-            if(this.blockChange.get(block).equals(Actions.DESTROY)){
-
-                if(isBed(block.getType())){
-                    Material material = block.getType();
-                    Block bed = block.getWorld().getBlockAt(block.getLocation());
-
-                    bed.setType(material);
-                    BlockData bedData = bed.getBlockData();
-                    Directional dir = (Directional) bedData;
-                    bedData.getPlacementMaterial();
-                    bed.setBlockData(bedData);
-//                    bed.setType(Material.SPRUCE_LOG);
-
-                    Block footBedBlock = block.getRelative(dir.getFacing().getOppositeFace());
-
-                    footBedBlock.setType(material);
-                    BlockData footBedData = footBedBlock.getBlockData();
-                    footBedData.getPlacementMaterial();
-                    footBedBlock.setBlockData(footBedData);
-//                    footBedBlock.setType(Material.OAK_WOOD);
-                }
-                else this.world.getBlockAt(block.getLocation()).setType(block.getType());
-
-            } else if(this.blockChange.get(block).equals(Actions.PLACE)){
+            if(this.blockChange.get(block).equals(Actions.PLACE)){
                 this.world.getBlockAt(block.getLocation()).setType(Material.AIR);
             }
+        }
+        for(Location loc : this.blockDestroy.keySet()){
+            Material blockMat = this.blockDestroy.get(loc);
+            Block block = loc.getBlock();
+
+            block.setType(blockMat);
+        }
+        for(BedBlock bed : this.bedDestroy){
+            bed.place();
         }
     }
 
     public void addBlockChange(Actions action, Block newBlock) {
         this.blockChange.put(newBlock, action);
+    }
+
+    public void addBlockDestroy(Location loc, Material mat) {
+        this.blockDestroy.put(loc, mat);
+    }
+
+    public void addBedDestroy(BedBlock bed) {
+        this.bedDestroy.add(bed);
     }
 
 }

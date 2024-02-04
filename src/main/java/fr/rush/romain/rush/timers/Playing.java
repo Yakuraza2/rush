@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 
+import static fr.rush.romain.rush.managers.FileManager.getConfigMessage;
+
 public class Playing {
 
     private final Rush rush;
@@ -46,7 +48,7 @@ public class Playing {
                         playerTimer.put(p, 1);
                     }else if(playerTimer.get(p) < 5){
                         playerTimer.put(p, playerTimer.get(p) + FileManager.getConfig(rush.getID()).getInt("timers.player-zone-verif"));
-                        p.sendMessage("§cRevenez dans la zone de jeu !");
+                        p.sendMessage(getConfigMessage("out-zone", p, rush));
                         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 0.5F, 1);
                     }else{
                         rush.killPlayer(p);

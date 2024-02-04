@@ -35,7 +35,10 @@ public class CommandsRush implements CommandExecutor {
     }
 
     private boolean commandSet(Player p, String[] args) {
-        if(args.length != 3 ) { p.sendMessage("§cUsage: /rush set <parameter> <rush_id>"); }
+        if(args.length != 3 ) {
+            p.sendMessage("§cUsage: /rush set <parameter> <rush_id> (<value>)");
+            p.sendMessage("§6Parameters list: §elobby, spectator-spawn, lobby-waiting, finish-waiting, player-zone-verif, bronze, iron, gold, diamond");
+        }
 
         String parameter = args[1];
         String rushid = args[2];
@@ -49,6 +52,20 @@ public class CommandsRush implements CommandExecutor {
 
         if(parameter.equalsIgnoreCase("lobby") || parameter.equalsIgnoreCase("spectator-spawn")){
             FileManager.setLocation(config, rushid + "." + parameter.toLowerCase(), p.getLocation());
+            FileManager.save(config, FileManager.get(rushid));
+            p.sendMessage(parameter + " changed !");
+            return true;
+        }
+        else if(parameter.equalsIgnoreCase("lobby-waiting") || parameter.equalsIgnoreCase("finish-waiting")
+                || parameter.equalsIgnoreCase("player-zone-verif") || parameter.equalsIgnoreCase("bronze") ||
+                parameter.equalsIgnoreCase("iron") ||parameter.equalsIgnoreCase("gold") ||parameter.equalsIgnoreCase("diamond")){
+
+            if(args.length < 4) {
+                p.sendMessage("§cYou need to give a value for " + parameter);
+                return false;
+            }
+            int value = Integer.parseInt(args[3]);
+            FileManager.set(config, rushid + ".timers." + parameter.toLowerCase(), value);
             FileManager.save(config, FileManager.get(rushid));
             p.sendMessage(parameter + " changed !");
             return true;
