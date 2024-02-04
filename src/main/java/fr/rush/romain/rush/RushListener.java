@@ -11,6 +11,8 @@ import fr.rush.romain.rush.objects.Team;
 import fr.rush.romain.rush.timers.GState;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.block.Bed;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -28,8 +30,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.ArmorMeta;
 
+import static fr.rush.romain.rush.Actions.DESTROY;
+import static fr.rush.romain.rush.Actions.PLACE;
 import static fr.rush.romain.rush.Core.allowedBlocks;
+import static fr.rush.romain.rush.Core.playersRush;
 import static fr.rush.romain.rush.managers.PacketsManager.connectToServer;
+import static org.bukkit.Material.AIR;
 import static org.bukkit.Material.YELLOW_BED;
 
 public class RushListener implements Listener {
@@ -79,11 +85,13 @@ public class RushListener implements Listener {
 
         Rush rush = Core.playersRush.get(player);
         Team playerTeam = rush.getPlayerTeam(player);
+        Block block = e.getBlock();
+        Material brokenBlockMaterial = block.getType();
 
-        Material brokenBlockMaterial = e.getBlock().getType();
+        boolean bed = false;
 
         // Prevent players from grief the map if they are in lobby or if the game is finish
-        if(!rush.isState(GState.PLAYING) && !player.hasPermission("rush.admin")) {
+        if(!rush.isState(GState.PLAYING)) {
             player.sendMessage(FileManager.getConfigMessage("no-break", rush));
             e.setCancelled(true);
             return;
@@ -92,27 +100,31 @@ public class RushListener implements Listener {
         if(brokenBlockMaterial.name().toLowerCase().contains("bed")) {
             if(brokenBlockMaterial.equals(Material.BROWN_BED)) {
                 GameManager.BrownBedBreak(player, rush, playerTeam);
-                return;
-            }
-
-            //else, go found the team's destroyed bed
-            for(Team team : rush.getTeams().values()){
-                if(brokenBlockMaterial.equals(team.getBedMaterial())){
-                    if(team.equals(playerTeam)){
-                        e.setCancelled(true);
-                        player.sendMessage(FileManager.getConfigMessage("ally-bed-destroy", rush));
-                        return;
+                bed = true;
+            }else{
+                //else, go found the team's destroyed bed
+                for(Team team : rush.getTeams().values()){
+                    if(brokenBlockMaterial.equals(team.getBedMaterial())) {
+                        if (team.equals(playerTeam)) {
+                            e.setCancelled(true);
+                            player.sendMessage(FileManager.getConfigMessage("ally-bed-destroy", rush));
+                            return;
+                        }
+                        team.breakBed(player, rush);
+                        bed = true;
+                        break;
                     }
-                    team.breakBed(player, rush);
-                    return;
                 }
             }
         }
 
-        if(!allowedBlocks.contains(brokenBlockMaterial)){
+        if(!allowedBlocks.contains(brokenBlockMaterial) && !bed){
             e.setCancelled(true);
             return;
         }
+
+        playersRush.get(player).addBlockChange(DESTROY, block);
+
 
     }
 
@@ -121,7 +133,7 @@ public class RushListener implements Listener {
         Block block = e.getBlock();
         Player p = e.getPlayer();
 
-        if (p.hasPermission("rush.admin")) return;
+        if(!playersRush.containsKey(p)) return;
 
         if (isBed(block.getType())) {
             e.setCancelled(true);
@@ -130,7 +142,16 @@ public class RushListener implements Listener {
             } else {
                 p.getInventory().getItemInOffHand().setAmount(0);
             }
+            return;
         }
+
+        if(!allowedBlocks.contains(block.getType())){
+            e.setCancelled(true);
+            return;
+        }
+
+        playersRush.get(p).addBlockChange(PLACE, block);
+
     }
 
     @EventHandler
@@ -144,20 +165,13 @@ public class RushListener implements Listener {
         }
     }
 
-    public boolean isBed(Material block) {
+    public static boolean isBed(Material block) {
         return block.name().toLowerCase().contains("bed");
     }
 
     @EventHandler
     public void Explosion(EntityExplodeEvent e) {
-        for (Block b : e.blockList()) {
-            if (b.getType() != Material.SANDSTONE) {
-                e.blockList().remove(b);
-            }
-            if (b.getType() == YELLOW_BED || b.getType() == Material.PURPLE_BED) {
-                e.setCancelled(true);
-            }
-        }
+        e.blockList().removeIf(block -> block.getType() != Material.SANDSTONE);
     }
 
     @EventHandler

@@ -1,15 +1,18 @@
 package fr.rush.romain.rush.objects;
 
-import fr.rush.romain.rush.managers.InventoryManager;
-import fr.rush.romain.rush.timers.RushTimer;
-import fr.rush.romain.rush.timers.GState;
+import fr.rush.romain.rush.Actions;
 import fr.rush.romain.rush.Core;
 import fr.rush.romain.rush.managers.FileManager;
 import fr.rush.romain.rush.managers.GameManager;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import fr.rush.romain.rush.managers.InventoryManager;
+import fr.rush.romain.rush.timers.GState;
+import fr.rush.romain.rush.timers.RushTimer;
+import org.bukkit.*;
+import org.bukkit.block.Bed;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.type.Bed.Part;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -20,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static fr.rush.romain.rush.Core.logger;
+import static fr.rush.romain.rush.RushListener.isBed;
 
 public class Rush {
     private final String aRush_id;
@@ -35,6 +39,10 @@ public class Rush {
     private final HashMap<Player, Integer> playerKills = new HashMap<>();
     private final HashMap<Player, Integer> playerDeaths = new HashMap<>();
     private final List<Zone> aZoneList = new ArrayList<>();
+    private HashMap<Block, Actions> blockChange = new HashMap<>();
+    // Ancien block ; Nouveau block
+
+    private final World world;
 
     public Rush(String rush_id){
         aSlots = 0;
@@ -59,7 +67,7 @@ public class Rush {
 
         aRush_id = rush_id;
 
-        World world = Bukkit.getWorld(config.getString(rush_id + ".world"));
+        world = Bukkit.getWorld(config.getString(rush_id + ".world"));
 
         int x = config.getInt(rush_id + ".lobby.x");
         int y = config.getInt(rush_id + ".lobby.y");
@@ -119,6 +127,9 @@ public class Rush {
             Player player = it.next();
             GameManager.resetPlayer(player);
         }
+
+        this.regenMap();
+
         for(Team team : this.aTeams.values()) team.reset();
 
         this.setState(GState.WAITING_FOR_PLAYERS);
@@ -230,4 +241,40 @@ public class Rush {
         }
         return true;
     }
+
+    public void regenMap(){
+        for(Block block : this.blockChange.keySet()){
+            if(this.blockChange.get(block).equals(Actions.DESTROY)){
+
+                if(isBed(block.getType())){
+                    Material material = block.getType();
+                    Block bed = block.getWorld().getBlockAt(block.getLocation());
+
+                    bed.setType(material);
+                    BlockData bedData = bed.getBlockData();
+                    Directional dir = (Directional) bedData;
+                    bedData.getPlacementMaterial();
+                    bed.setBlockData(bedData);
+//                    bed.setType(Material.SPRUCE_LOG);
+
+                    Block footBedBlock = block.getRelative(dir.getFacing().getOppositeFace());
+
+                    footBedBlock.setType(material);
+                    BlockData footBedData = footBedBlock.getBlockData();
+                    footBedData.getPlacementMaterial();
+                    footBedBlock.setBlockData(footBedData);
+//                    footBedBlock.setType(Material.OAK_WOOD);
+                }
+                else this.world.getBlockAt(block.getLocation()).setType(block.getType());
+
+            } else if(this.blockChange.get(block).equals(Actions.PLACE)){
+                this.world.getBlockAt(block.getLocation()).setType(Material.AIR);
+            }
+        }
+    }
+
+    public void addBlockChange(Actions action, Block newBlock) {
+        this.blockChange.put(newBlock, action);
+    }
+
 }
